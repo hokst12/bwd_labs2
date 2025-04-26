@@ -12,13 +12,13 @@ const sequelize = new Sequelize(
     port: process.env.PG_PORT,
     dialect: 'postgres',
     logging: false,
+
     pool: {
       max: parseInt(process.env.PG_MAX_CONNECTIONS) || 28,
       min: 0,
       acquire: 30000,
       idle: parseInt(process.env.PG_IDLE_TIMEOUT) || 30000
     },
-    logging: process.env.NODE_ENV === 'development' ? console.log : false
   }
 );
 

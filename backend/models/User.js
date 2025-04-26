@@ -23,9 +23,17 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
+  deletedAt: {
+    type: DataTypes.DATE,
+    defaultValue: null,
+  }
 }, {
   tableName: 'users',
-  timestamps: false, // Отключаем автоматические поля `createdAt` и `updatedAt`
+  timestamps: false,
+  paranoid: true, // Включаем soft delete
+  defaultScope: {
+    where: { deletedAt: null } // Автофильтрация "удалённых"
+  }
 });
 
 module.exports = User;
