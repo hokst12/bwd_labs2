@@ -20,7 +20,7 @@ const eventsController = require('../controllers/events.js');
  *       500:
  *         description: Ошибка сервера
  */
-router.get('/', eventsController.get_events);
+router.get('/', eventsController.getEvents);
 
 /**
  * @swagger
@@ -64,7 +64,7 @@ router.get('/', eventsController.get_events);
  *       500:
  *         description: Ошибка сервера
  */
-router.post('/', eventsController.post_event);
+router.post('/', eventsController.postEvent);
 
 /**
  * @swagger
@@ -84,7 +84,7 @@ router.post('/', eventsController.post_event);
  *       500:
  *         description: Ошибка сервера
  */
-router.get('/all', eventsController.get_all_events);
+router.get('/all', eventsController.getAllEvents);
 
 /**
  * @swagger
@@ -110,7 +110,7 @@ router.get('/all', eventsController.get_all_events);
  *       500:
  *         description: Ошибка сервера
  */
-router.get('/:id', eventsController.get_event_id);
+router.get('/:id', eventsController.getEventId);
 
 
 /**
@@ -153,7 +153,7 @@ router.get('/:id', eventsController.get_event_id);
  *       500:
  *         description: Ошибка сервера
  */
-router.put('/:id', eventsController.put_event);
+router.put('/:id', eventsController.putEvent);
 
 /**
  * @swagger
@@ -185,7 +185,7 @@ router.put('/:id', eventsController.put_event);
  *       500:
  *         description: Ошибка сервера
  */
-router.delete('/:id', eventsController.delete_event);
+router.delete('/:id', eventsController.deleteEvent);
 
 /**
  * @swagger
@@ -218,6 +218,6 @@ router.delete('/:id', eventsController.delete_event);
  *       500:
  *         description: Ошибка сервера
  */
-router.post('/:id/restore', eventsController.restore_event);
+router.post('/:id/restore', eventsController.restoreEvent);
 
 module.exports = router;

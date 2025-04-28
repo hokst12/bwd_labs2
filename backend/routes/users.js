@@ -37,7 +37,7 @@ const usersController = require('../controllers/users.js');
  *       500:
  *         description: Ошибка сервера
  */
-router.post('/', usersController.post_user);
+router.post('/', usersController.postUser);
 
 /**
  * @swagger
@@ -57,7 +57,7 @@ router.post('/', usersController.post_user);
  *       500:
  *         description: Ошибка сервера
  */
-router.get('/', usersController.get_users);
+router.get('/', usersController.getUsers);
 
 /**
  * @swagger
@@ -77,7 +77,7 @@ router.get('/', usersController.get_users);
  *       500:
  *         description: Ошибка сервера
  */
-router.get('/all', usersController.get_all_users);
+router.get('/all', usersController.getAllUsers);
 
 /**
  * @swagger
@@ -109,7 +109,7 @@ router.get('/all', usersController.get_all_users);
  *       500:
  *         description: Ошибка сервера
  */
-router.delete('/:id', usersController.delete_user);
+router.delete('/:id', usersController.deleteUser);
 
 /**
  * @swagger
@@ -142,6 +142,6 @@ router.delete('/:id', usersController.delete_user);
  *       500:
  *         description: Ошибка сервера
  */
-router.post('/:id/restore', usersController.restore_user);
+router.post('/:id/restore', usersController.restoreUser);
 
 module.exports = router;

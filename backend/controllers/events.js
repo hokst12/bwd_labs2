@@ -2,7 +2,7 @@ const User = require('../models/User');
 const Event = require('../models/Event');
 
 module.exports = {
-    get_events: async (req, res) => {
+    getEvents: async (req, res) => {
         try {
             const events = await Event.findAll({
               include: {
@@ -17,7 +17,7 @@ module.exports = {
           }
         },
 
-    post_event: async (req, res) => {
+    postEvent: async (req, res) => {
         try {
             const { title, description, date, createdBy } = req.body;
             
@@ -43,7 +43,7 @@ module.exports = {
           }
         },
   
-    get_all_events: async (req, res) => {
+    getAllEvents: async (req, res) => {
         try {
             const events = await Event.unscoped().findAll({
               include: {
@@ -61,7 +61,7 @@ module.exports = {
           }
         },
 
-    get_event_id: async (req, res) => {
+    getEventId: async (req, res) => {
         try {
             const event = await Event.unscoped().findOne({
               where: { id: req.params.id },
@@ -85,7 +85,7 @@ module.exports = {
           }
         },
 
-    put_event: async (req, res) => {
+    putEvent: async (req, res) => {
         try {
             const { title, description, date } = req.body;
             
@@ -116,7 +116,7 @@ module.exports = {
           }
         },
 
-    delete_event: async (req, res) => {
+    deleteEvent: async (req, res) => {
         try {
             const event = await Event.findOne({
               where: { id: req.params.id }
@@ -141,7 +141,7 @@ module.exports = {
           }
         },
 
-    restore_event: async (req, res) => {
+    restoreEvent: async (req, res) => {
         try {
             const event = await Event.unscoped().findOne({
               where: { id: req.params.id }

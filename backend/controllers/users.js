@@ -1,7 +1,7 @@
 const User = require('../models/User');
 
 module.exports = {
-  post_user: async (req, res) => {
+  postUser: async (req, res) => {
     try {
         const { name, email } = req.body;
     
@@ -36,7 +36,7 @@ module.exports = {
       }
     },
 
-    get_users: async (req, res) => {
+    getUsers: async (req, res) => {
         try {
             const users = await User.findAll();
             res.json(users);
@@ -45,7 +45,7 @@ module.exports = {
           }
         },
 
-    get_all_users: async (req, res) => {
+    getAllUsers: async (req, res) => {
         try {
             const users = await User.unscoped().findAll();
             res.json(users);
@@ -54,7 +54,7 @@ module.exports = {
           }
         },
     
-    delete_user: async (req, res) => {
+    deleteUser: async (req, res) => {
         try {
             const user = await User.findOne({
               where: { id: req.params.id }
@@ -76,7 +76,7 @@ module.exports = {
           }
         },
 
-    restore_user: async (req, res) => {
+    restoreUser: async (req, res) => {
         try {
             const user = await User.unscoped().findOne({
               where: { id: req.params.id }
