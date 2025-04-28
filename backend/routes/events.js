@@ -1,0 +1,223 @@
+const express = require('express');
+const router = express.Router();
+const eventsController = require('../controllers/events.js');
+
+/**
+ * @swagger
+ * /events:
+ *   get:
+ *     summary: Получить все активные мероприятия
+ *     tags: [Events]
+ *     responses:
+ *       200:
+ *         description: Список активных мероприятий
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Event'
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/', eventsController.get_events);
+
+/**
+ * @swagger
+ * /events:
+ *   post:
+ *     summary: Создать новое мероприятие
+ *     tags: [Events]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - date
+ *               - createdBy
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Концерт"
+ *               description:
+ *                 type: string
+ *                 example: "Рок-фестиваль"
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-06-20T19:00:00"
+ *               createdBy:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Мероприятие создано
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Event'
+ *       400:
+ *         description: Неверные входные данные
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.post('/', eventsController.post_event);
+
+/**
+ * @swagger
+ * /events/all:
+ *   get:
+ *     summary: Получить все мероприятия (включая удалённые)
+ *     tags: [Events]
+ *     responses:
+ *       200:
+ *         description: Полный список мероприятий
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Event'
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/all', eventsController.get_all_events);
+
+/**
+ * @swagger
+ * /events/{id}:
+ *   get:
+ *     summary: Получить мероприятие по ID
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Данные мероприятия
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Event'
+ *       404:
+ *         description: Мероприятие не найдено
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/:id', eventsController.get_event_id);
+
+
+/**
+ * @swagger
+ * /events/{id}:
+ *   put:
+ *     summary: Обновить мероприятие
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Обновлённое мероприятие
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Event'
+ *       400:
+ *         description: Нет данных для обновления
+ *       404:
+ *         description: Мероприятие не найдено
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.put('/:id', eventsController.put_event);
+
+/**
+ * @swagger
+ * /events/{id}:
+ *   delete:
+ *     summary: Пометить мероприятие как удалённое
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Мероприятие помечено как удалённое
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 deletedAt:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: Мероприятие не найдено
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.delete('/:id', eventsController.delete_event);
+
+/**
+ * @swagger
+ * /events/{id}/restore:
+ *   post:
+ *     summary: Восстановить удалённое мероприятие
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Мероприятие восстановлено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 event:
+ *                   $ref: '#/components/schemas/Event'
+ *       400:
+ *         description: Мероприятие уже активно
+ *       404:
+ *         description: Мероприятие не найдено
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.post('/:id/restore', eventsController.restore_event);
+
+module.exports = router;
