@@ -29,6 +29,13 @@ const User = sequelize.define('User', {
       this.setDataValue('password', hash);
     }
   },
+  loginHistory: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+    get() {
+      return this.getDataValue('loginHistory') || []
+    }
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

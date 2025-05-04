@@ -31,6 +31,14 @@ const swaggerOptions = {
           }
         },
         schemas: {
+          AuthResponse: {
+            type: 'object',
+            properties: {
+              token: { type: 'string' },
+              user: { $ref: '#/components/schemas/User' },
+              isNewDevice: { type: 'boolean' }
+            }
+          },
           User: {
             type: 'object',
             properties: {
