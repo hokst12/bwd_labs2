@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const bcrypt = require('bcryptjs'); 
 
 const User = sequelize.define('User', {
   id: {
@@ -19,6 +20,15 @@ const User = sequelize.define('User', {
       isEmail: true,
     },
   },
+  password: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    set(value) {
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(value, salt);
+      this.setDataValue('password', hash);
+    }
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
@@ -32,8 +42,13 @@ const User = sequelize.define('User', {
   timestamps: false,
   paranoid: true, // Включаем soft delete
   defaultScope: {
-    where: { deletedAt: null } // Автофильтрация "удалённых"
+    where: { deletedAt: null },
+    attributes: { exclude: ['password'] }
   }
 });
+
+User.prototype.comparePassword = function(candidatePassword) {
+  return bcrypt.compareSync(candidatePassword, this.password);
+};
 
 module.exports = User;

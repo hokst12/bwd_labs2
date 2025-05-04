@@ -1,43 +1,16 @@
 const express = require('express');
+const passport = require('passport');
 const router = express.Router();
-const usersController = require('../controllers/users.js');
+const usersController = require('../../controllers/users');
+
+router.use(passport.authenticate('jwt', { session: false }));
 
 /**
  * @swagger
- * /users:
- *   post:
- *     summary: Создать нового пользователя
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *             properties:
- *               name:
- *                 type: string
- *                 example: "Иван Иванов"
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "ivan@example.com"
- *     responses:
- *       201:
- *         description: Пользователь создан
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       400:
- *         description: Неверные входные данные или email уже существует
- *       500:
- *         description: Ошибка сервера
+ * tags:
+ *   - name: Users
+ *     description: Управление пользователями (требуется авторизация)
  */
-router.post('/', usersController.postUser);
 
 /**
  * @swagger
@@ -45,6 +18,8 @@ router.post('/', usersController.postUser);
  *   get:
  *     summary: Получить всех активных пользователей
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Список пользователей
@@ -65,6 +40,8 @@ router.get('/', usersController.getUsers);
  *   get:
  *     summary: Получить всех пользователей (включая удалённых)
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Полный список пользователей
@@ -85,6 +62,8 @@ router.get('/all', usersController.getAllUsers);
  *   delete:
  *     summary: Пометить пользователя как удалённого
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -117,6 +96,8 @@ router.delete('/:id', usersController.deleteUser);
  *   post:
  *     summary: Восстановить удалённого пользователя
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

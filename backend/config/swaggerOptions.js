@@ -18,6 +18,18 @@ const swaggerOptions = {
         },
       ],
       components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
+          },
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
+          }
+        },
         schemas: {
           User: {
             type: 'object',
@@ -46,7 +58,7 @@ const swaggerOptions = {
         }
       }
     },
-    apis: ['./routes/events.js','./routes/users.js'],
+    apis: ['./routes/public/events.js','./routes/protected/events.js','./routes/protected/users.js','./routes/auth.js'],
   };
 
   module.exports = swaggerOptions;

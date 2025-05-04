@@ -7,13 +7,19 @@ const Event = require('./models/Event');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const morgan = require('morgan');
-const usersRouter = require('./routes/users');
-const eventsRouter = require('./routes/events');
 const swaggerOptions = require('./config/swaggerOptions');
+const passport = require('passport');
+require('./config/passport');
+const authRoutes = require('./routes/auth');
+const publicEventRoutes = require('./routes/public/events');
+const protectedEventRoutes = require('./routes/protected/events');
+const userRoutes = require('./routes/protected/users');
 
 dotenv.config();
 
 const app = express();
+
+app.use(passport.initialize());
 
 app.use(morgan((tokens, req, res) => {
   return [
@@ -26,6 +32,7 @@ app.use(morgan((tokens, req, res) => {
   ].join(' ');
 }));
 app.use(express.json());
+
 
 const simpleCors = cors({
   origin: true, // Разрешаем всем доменам
@@ -53,8 +60,13 @@ const restrictMethodsForUntrusted = (req, res, next) => {
 app.use(simpleCors);
 app.use(restrictMethodsForUntrusted);
 
-app.use('/users', usersRouter);
-app.use('/events', eventsRouter);
+// Публичные роуты
+app.use('/events', publicEventRoutes);
+
+// Приватные роуты
+app.use('/auth', authRoutes);
+app.use('/events', protectedEventRoutes);
+app.use('/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
