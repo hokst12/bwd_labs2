@@ -18,7 +18,27 @@ const swaggerOptions = {
         },
       ],
       components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
+          },
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
+          }
+        },
         schemas: {
+          AuthResponse: {
+            type: 'object',
+            properties: {
+              token: { type: 'string' },
+              user: { $ref: '#/components/schemas/User' },
+              isNewDevice: { type: 'boolean' }
+            }
+          },
           User: {
             type: 'object',
             properties: {
@@ -46,7 +66,7 @@ const swaggerOptions = {
         }
       }
     },
-    apis: ['./routes/events.js','./routes/users.js'],
+    apis: ['./routes/public/events.js','./routes/protected/events.js','./routes/protected/users.js','./routes/auth.js'],
   };
 
   module.exports = swaggerOptions;

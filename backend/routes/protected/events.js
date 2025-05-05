@@ -1,26 +1,16 @@
 const express = require('express');
+const passport = require('passport');
 const router = express.Router();
-const eventsController = require('../controllers/events.js');
+const eventsController = require('../../controllers/events');
+
+router.use(passport.authenticate('jwt', { session: false }));
 
 /**
  * @swagger
- * /events:
- *   get:
- *     summary: Получить все активные мероприятия
- *     tags: [Events]
- *     responses:
- *       200:
- *         description: Список активных мероприятий
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Event'
- *       500:
- *         description: Ошибка сервера
+ * tags:
+ *   - name: Events
+ *     description: Управление мероприятиями (требуется авторизация)
  */
-router.get('/', eventsController.getEvents);
 
 /**
  * @swagger
@@ -28,6 +18,8 @@ router.get('/', eventsController.getEvents);
  *   post:
  *     summary: Создать новое мероприятие
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -72,6 +64,8 @@ router.post('/', eventsController.postEvent);
  *   get:
  *     summary: Получить все мероприятия (включая удалённые)
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Полный список мероприятий
@@ -92,6 +86,8 @@ router.get('/all', eventsController.getAllEvents);
  *   get:
  *     summary: Получить мероприятие по ID
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -119,6 +115,8 @@ router.get('/:id', eventsController.getEventId);
  *   put:
  *     summary: Обновить мероприятие
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -161,6 +159,8 @@ router.put('/:id', eventsController.putEvent);
  *   delete:
  *     summary: Пометить мероприятие как удалённое
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -193,6 +193,8 @@ router.delete('/:id', eventsController.deleteEvent);
  *   post:
  *     summary: Восстановить удалённое мероприятие
  *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

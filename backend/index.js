@@ -7,54 +7,40 @@ const Event = require('./models/Event');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const morgan = require('morgan');
-const usersRouter = require('./routes/users');
-const eventsRouter = require('./routes/events');
 const swaggerOptions = require('./config/swaggerOptions');
+const passport = require('passport');
+require('./config/passport');
+const authRoutes = require('./routes/auth');
+const publicEventRoutes = require('./routes/public/events');
+const protectedEventRoutes = require('./routes/protected/events');
+const userRoutes = require('./routes/protected/users');
+const {
+  setupMorgan,
+  setupCors,
+  restrictMethodsForUntrusted,
+  jsonErrorHandler
+} = require('./config/middleware');
 
 dotenv.config();
 
 const app = express();
 
-app.use(morgan((tokens, req, res) => {
-  return [
-    `[${new Date().toISOString()}]`,
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
-    `${tokens['response-time'](req, res)}ms`,
-    `- body: ${JSON.stringify(req.body)}`
-  ].join(' ');
-}));
+app.use(passport.initialize());
+
 app.use(express.json());
 
-const simpleCors = cors({
-  origin: true, // Разрешаем всем доменам
-  methods: ['GET', 'POST', 'OPTIONS'], // Явно указываем разрешённые методы
-  optionsSuccessStatus: 200
-});
-
-// Middleware для проверки DELETE/PUT
-const restrictMethodsForUntrusted = (req, res, next) => {
-  const trustedDomains = process.env.TRUSTED_DOMAINS.split(',');
-  const origin = req.headers.origin;
-  
-  // Если это DELETE/PUT и домен недоверенный — блокируем
-  if (['DELETE', 'PUT'].includes(req.method)) {
-    if (!trustedDomains.includes(origin)) {
-      return res.status(403).json({ 
-        error: 'Метод запрещён для вашего домена' 
-      });
-    }
-  }
-  next();
-};
-
-// Применяем CORS
-app.use(simpleCors);
+app.use(setupMorgan());
+app.use(setupCors());
 app.use(restrictMethodsForUntrusted);
+app.use(jsonErrorHandler);
 
-app.use('/users', usersRouter);
-app.use('/events', eventsRouter);
+// Публичные роуты
+app.use('/events', publicEventRoutes);
+
+// Приватные роуты
+app.use('/auth', authRoutes);
+app.use('/events', protectedEventRoutes);
+app.use('/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 

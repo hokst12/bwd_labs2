@@ -1,41 +1,6 @@
 const User = require('../models/User');
 
 module.exports = {
-  postUser: async (req, res) => {
-    try {
-        const { name, email } = req.body;
-    
-        if (!name || !email) {
-          return res.status(400).json({ error: 'Обязательные поля: name, email' });
-        }
-    
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          return res.status(400).json({ error: 'Некорректный формат email' });
-        }
-    
-        const user = await User.create({
-          name,
-          email
-        });
-    
-        res.status(201).json({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          createdAt: user.createdAt
-        });
-    
-      } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
-          return res.status(400).json({ error: 'Пользователь с таким email уже существует' });
-        }
-        res.status(500).json({ 
-          error: 'Ошибка при создании пользователя',
-          details: error.message 
-        });
-      }
-    },
-
     getUsers: async (req, res) => {
         try {
             const users = await User.findAll();
