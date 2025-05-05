@@ -1,11 +1,12 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: process.env.MAILTRAP_HOST,
-  port: process.env.MAILTRAP_PORT,
+  host: 'smtp.mail.ru',
+  port: 465,
+  secure: true, // 
   auth: {
-    user: process.env.MAILTRAP_USER,
-    pass: process.env.MAILTRAP_PASS
+    user: process.env.MAILRU_EMAIL, 
+    pass: process.env.MAILRU_PASSWORD 
   }
 });
 
@@ -13,7 +14,7 @@ module.exports = {
   sendSecurityAlert: async (email, userAgent, ip) => {
     try {
       const info = await transporter.sendMail({
-        from: '"Security Service" <security@yourdomain.com>',
+        from: process.env.MAILRU_EMAIL,
         to: email,
         subject: '⚠ New Device or ip Login Detected',
         text: `
