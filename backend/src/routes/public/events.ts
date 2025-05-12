@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import eventsController from '../../controllers/events';
+
 const router = express.Router();
-const eventsController = require('../../controllers/events');
 
 /**
  * @swagger
@@ -29,4 +30,4 @@ const eventsController = require('../../controllers/events');
  */
 router.get('/', eventsController.getEvents);
 
-module.exports = router;
+export default router;

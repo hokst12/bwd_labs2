@@ -1,7 +1,8 @@
-const express = require('express');
-const passport = require('passport');
+import express from 'express';
+import passport from 'passport';
+import usersController from '../../controllers/users';
+
 const router = express.Router();
-const usersController = require('../../controllers/users');
 
 router.use(passport.authenticate('jwt', { session: false }));
 
@@ -125,4 +126,4 @@ router.delete('/:id', usersController.deleteUser);
  */
 router.post('/:id/restore', usersController.restoreUser);
 
-module.exports = router;
+export default router;
