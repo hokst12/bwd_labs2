@@ -8,7 +8,20 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "check": "tsc --noEmit && eslint . --ext .ts",
-    "dev": "nodemon --exec ts-node index.ts"
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register index.ts",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "npm run lint",
+      "npm run format"
+    ],
+    "*.{json,md,yml}": [
+      "npm run format"
+    ]
+  },
+  "_moduleAliases": {
+    "@": "src"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +33,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "module-alias": "^2.2.3",
     "morgan": "^1.10.0",
     "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
@@ -51,9 +65,12 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
     "globals": "^16.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.0"
   }

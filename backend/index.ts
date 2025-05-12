@@ -1,22 +1,24 @@
+import 'module-alias/register';
+import 'tsconfig-paths/register';
 import express from 'express';
 import dotenv from 'dotenv';
-import sequelize from './src/config/db';
-import User from './src/models/User';
-import Event from './src/models/Event';
+import sequelize from '@/config/db';
+import User from '@/models/User';
+import Event from '@/models/Event';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import swaggerOptions from './src/config/swaggerOptions';
-import passport from './src/config/passport';
-import authRoutes from './src/routes/auth';
-import publicEventRoutes from './src/routes/public/events';
-import protectedEventRoutes from './src/routes/protected/events';
-import userRoutes from './src/routes/protected/users';
+import swaggerOptions from '@/config/swaggerOptions';
+import passport from '@/config/passport';
+import authRoutes from '@/routes/auth';
+import publicEventRoutes from '@/routes/public/events';
+import protectedEventRoutes from '@/routes/protected/events';
+import userRoutes from '@/routes/protected/users';
 import {
   setupMorgan,
   setupCors,
   restrictMethodsForUntrusted,
   jsonErrorHandler,
-} from './src/config/middleware';
+} from '@/config/middleware';
 
 dotenv.config();
 

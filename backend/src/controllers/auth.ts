@@ -1,7 +1,7 @@
 import { Request, Response, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
-import { emailService } from '../services/emailService';
+import User from '@/models/User';
+import { emailService } from '@/services/emailService';
 import requestIp from 'request-ip';
 
 interface LoginRequest {
