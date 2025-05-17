@@ -1,11 +1,53 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const emailService = require('../services/emailService');
-const requestIp = require('request-ip');
+import { Request, Response, RequestHandler } from 'express';
+import jwt from 'jsonwebtoken';
+import User from '@/models/User';
+import { emailService } from '@/services/emailService';
+import requestIp from 'request-ip';
 
-module.exports = {
-  register: async (req, res) => {
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequest {
+  email: string;
+  name: string;
+  password: string;
+}
+
+interface LoginHistoryItem {
+  ip: string;
+  userAgent: string;
+  date: Date;
+}
+
+function checkLoginHistory(
+  user: InstanceType<typeof User>,
+  currentIp: string | null,
+  currentUserAgent: string | undefined,
+): boolean {
+  const MAX_HISTORY_ITEMS = 5;
+  const history = user.get('loginHistory') as LoginHistoryItem[];
+
+  if (!currentIp || !currentUserAgent) return false;
+
+  const isKnown = history.some(
+    (entry) => entry.ip === currentIp && entry.userAgent === currentUserAgent,
+  );
+
+  if (!isKnown) {
+    user.setDataValue('loginHistory', [
+      { ip: currentIp, userAgent: currentUserAgent, date: new Date() },
+      ...history.slice(0, MAX_HISTORY_ITEMS - 1),
+    ]);
+    user.save();
+  }
+
+  return !isKnown;
+}
+
+const authController = {
+  register: (async (req: Request<RegisterRequest>, res: Response) => {
     const { email, name, password } = req.body;
 
     if (!email || !name || !password) {
@@ -19,35 +61,34 @@ module.exports = {
       }
 
       const user = await User.create({ email, name, password });
-      res.status(201).json({ 
+      res.status(201).json({
         message: 'Регистрация успешна',
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
       });
-    } catch (error) {
+    } catch {
       res.status(500).json({ message: 'Ошибка сервера' });
     }
-  },
+  }) as unknown as RequestHandler,
 
-  login: async (req, res) => {
+  login: (async (
+    req: Request<unknown, unknown, LoginRequest>,
+    res: Response,
+  ) => {
     const { email, password } = req.body;
-  
-    // Валидация входных данных
+
     if (!email || !password) {
       return res.status(400).json({ message: 'Email и пароль обязательны' });
     }
-  
+
     try {
-      // Ищем пользователя (включая удалённых)
       const user = await User.unscoped().findOne({ where: { email } });
-  
-      // Проверяем существование пользователя и пароль
+
       if (!user || !user.comparePassword(password)) {
         return res.status(401).json({ message: 'Неверный email или пароль' });
       }
-  
-      // Проверяем, не удалён ли пользователь
+
       if (user.deletedAt) {
         return res.status(403).json({ message: 'Аккаунт деактивирован' });
       }
@@ -57,56 +98,35 @@ module.exports = {
       const isNewDevice = checkLoginHistory(user, ip, userAgent);
 
       if (isNewDevice) {
-        await emailService.sendSecurityAlert(user.email, userAgent, ip);
+        await emailService.sendSecurityAlert(
+          user.email,
+          userAgent || 'Unknown',
+          ip || 'Unknown',
+        );
       }
-  
-      // Генерируем токен
+
       const token = jwt.sign(
         {
           id: user.id,
-          email: user.email
+          email: user.email,
         },
-        process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        process.env.JWT_SECRET as string,
+        { expiresIn: '24h' },
       );
-  
-      // Возвращаем данные пользователя (без пароля)
-      const userData = user.get();
-      delete userData.password;
-      delete userData.deletedAt;
-  
+
       res.json({
         token,
         user: {
           id: user.id,
           name: user.name,
-          email: user.email
-        }
+          email: user.email,
+        },
       });
-  
     } catch (error) {
       console.error('Ошибка авторизации:', error);
       res.status(500).json({ message: 'Ошибка сервера' });
     }
-
-    function checkLoginHistory(user, currentIp, currentUserAgent) {
-      const MAX_HISTORY_ITEMS = 5;
-      const history = user.loginHistory;
-      
-      const isKnown = history.some(entry => 
-        entry.ip === currentIp && 
-        entry.userAgent === currentUserAgent
-      );
-    
-      if (!isKnown) {
-        user.loginHistory = [
-          { ip: currentIp, userAgent: currentUserAgent, date: new Date() },
-          ...history.slice(0, MAX_HISTORY_ITEMS - 1)
-        ];
-        user.save();
-      }
-    
-      return !isKnown;
-    }
-  }
+  }) as unknown as RequestHandler,
 };
+
+export default authController;

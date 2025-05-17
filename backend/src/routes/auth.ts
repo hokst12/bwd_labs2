@@ -1,10 +1,7 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import express from 'express';
+import authController from '@/controllers/auth';
+
 const router = express.Router();
-require('dotenv').config();
-const authController = require('../controllers/auth');
 
 /**
  * @swagger
@@ -106,4 +103,4 @@ router.post('/register', authController.register);
  */
 router.post('/login', authController.login);
 
-module.exports = router;
+export default router;

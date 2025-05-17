@@ -1,7 +1,8 @@
-const express = require('express');
-const passport = require('passport');
+import express from 'express';
+import passport from 'passport';
+import eventsController from '@/controllers/events';
+
 const router = express.Router();
-const eventsController = require('../../controllers/events');
 
 router.use(passport.authenticate('jwt', { session: false }));
 
@@ -107,7 +108,6 @@ router.get('/all', eventsController.getAllEvents);
  *         description: Ошибка сервера
  */
 router.get('/:id', eventsController.getEventId);
-
 
 /**
  * @swagger
@@ -222,4 +222,4 @@ router.delete('/:id', eventsController.deleteEvent);
  */
 router.post('/:id/restore', eventsController.restoreEvent);
 
-module.exports = router;
+export default router;
