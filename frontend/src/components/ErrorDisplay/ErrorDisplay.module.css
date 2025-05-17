@@ -1,130 +1,130 @@
 .error-notification {
-    position: fixed;
-    top: 80px; /* Ниже шапки */
-    right: 20px;
-    z-index: 1000;
-    max-width: 400px;
-    width: calc(100% - 40px);
+  position: fixed;
+  top: 80px; /* Ниже шапки */
+  right: 20px;
+  z-index: 1000;
+  max-width: 400px;
+  width: calc(100% - 40px);
+}
+
+.error-content {
+  position: relative;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  word-break: break-word;
+  line-height: 1.5;
+  transform: translateX(0);
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.error-content.error-type {
+  background-color: #fff5f5;
+  border-left: 4px solid #ff5252;
+}
+
+.error-content.client-error-type {
+  background-color: #fff8e6;
+  border-left: 4px solid #ffc107;
+}
+
+.error-content.server-error-type {
+  background-color: #f1f8e9;
+  border-left: 4px solid #4caf50;
+}
+
+.error-code {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.error-type .error-code {
+  color: #d32f2f;
+}
+
+.client-error-type .error-code {
+  color: #e65100;
+}
+
+.server-error-type .error-code {
+  color: #2e7d32;
+}
+
+.error-message {
+  color: #333;
+  font-size: 14px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  outline: none;
+}
+
+.error-type .close-btn {
+  color: #d32f2f;
+}
+
+.client-error-type .close-btn {
+  color: #e65100;
+}
+
+.server-error-type .close-btn {
+  color: #2e7d32;
+}
+
+.close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.close-btn:focus {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
   }
-  
-  .error-content {
-    position: relative;
-    padding: 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    word-break: break-word;
-    line-height: 1.5;
+  to {
     transform: translateX(0);
-    animation: slideIn 0.3s ease-out forwards;
+    opacity: 1;
   }
-  
-  .error-content.error-type {
-    background-color: #fff5f5;
-    border-left: 4px solid #ff5252;
+}
+
+@keyframes slideOut {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
   }
-  
-  .error-content.client-error-type {
-    background-color: #fff8e6;
-    border-left: 4px solid #ffc107;
+}
+
+/* Для анимации закрытия */
+.error-content.closing {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  .error-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: calc(100% - 20px);
+    max-width: none;
   }
-  
-  .error-content.server-error-type {
-    background-color: #f1f8e9;
-    border-left: 4px solid #4caf50;
-  }
-  
-  .error-code {
-    font-weight: bold;
-    margin-bottom: 8px;
-    font-size: 15px;
-  }
-  
-  .error-type .error-code {
-    color: #d32f2f;
-  }
-  
-  .client-error-type .error-code {
-    color: #e65100;
-  }
-  
-  .server-error-type .error-code {
-    color: #2e7d32;
-  }
-  
-  .error-message {
-    color: #333;
-    font-size: 14px;
-  }
-  
-  .close-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background-color 0.2s;
-    outline: none;
-  }
-  
-  .error-type .close-btn {
-    color: #d32f2f;
-  }
-  
-  .client-error-type .close-btn {
-    color: #e65100;
-  }
-  
-  .server-error-type .close-btn {
-    color: #2e7d32;
-  }
-  
-  .close-btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  .close-btn:focus {
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideOut {
-    to {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-  }
-  
-  /* Для анимации закрытия */
-  .error-content.closing {
-    animation: slideOut 0.3s ease-in forwards;
-  }
-  
-  /* Мобильная адаптация */
-  @media (max-width: 480px) {
-    .error-notification {
-      top: 10px;
-      right: 10px;
-      left: 10px;
-      width: calc(100% - 20px);
-      max-width: none;
-    }
-  }
+}

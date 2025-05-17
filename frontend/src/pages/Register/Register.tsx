@@ -13,7 +13,10 @@ export const Register = () => {
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState<{message: string, statusCode?: number} | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    statusCode?: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -63,7 +66,7 @@ export const Register = () => {
           <h2 className={styles.title}>Регистрация</h2>
 
           {error && (
-            <ErrorDisplay 
+            <ErrorDisplay
               error={error.message}
               statusCode={error.statusCode}
               onClose={() => setError(null)}

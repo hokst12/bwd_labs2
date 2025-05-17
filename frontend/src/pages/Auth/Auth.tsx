@@ -11,7 +11,10 @@ export const Auth = () => {
     email: '',
     password: '',
   });
-  const [error, setError] = useState<{message: string, statusCode?: number} | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    statusCode?: number;
+  } | null>(null);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -43,7 +46,8 @@ export const Auth = () => {
       await authService.login(formData.email, formData.password);
       navigate('/events');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Ошибка авторизации';
+      const errorMessage =
+        error.response?.data?.message || 'Ошибка авторизации';
       const statusCode = error.response?.status || 500;
       setError({ message: errorMessage, statusCode });
     } finally {
@@ -60,7 +64,7 @@ export const Auth = () => {
           <h2 className={styles.title}>Вход в систему</h2>
 
           {message && (
-            <ErrorDisplay 
+            <ErrorDisplay
               error={message}
               statusCode={200}
               onClose={() => setMessage('')}
@@ -68,7 +72,7 @@ export const Auth = () => {
           )}
 
           {error && (
-            <ErrorDisplay 
+            <ErrorDisplay
               error={error.message}
               statusCode={error.statusCode}
               onClose={() => setError(null)}

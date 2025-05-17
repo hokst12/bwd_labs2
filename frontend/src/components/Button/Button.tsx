@@ -5,11 +5,11 @@ import styles from './Button.module.css';
 interface ButtonProps {
   children: React.ReactNode;
   to?: string;
-  variant?: 'primary' | 'secondary' | 'text' | 'danger';
+  variant?: 'primary' | 'secondary' | 'text' | 'danger' | 'success'; // Добавлен 'success'
   onClick?: () => void;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
-  disabled?: boolean; // Добавляем пропс disabled
+  disabled?: boolean;
 }
 
 export const Button = ({
@@ -19,7 +19,7 @@ export const Button = ({
   onClick,
   className,
   type = 'button',
-  disabled = false, // Значение по умолчанию
+  disabled = false,
 }: ButtonProps) => {
   const buttonClass = cn(styles.button, styles[variant], className, {
     [styles.disabled]: disabled,
@@ -37,7 +37,7 @@ export const Button = ({
     <button
       className={buttonClass}
       onClick={onClick}
-      type={type} // Пробрасываем type в button
+      type={type}
       disabled={disabled}
     >
       {children}

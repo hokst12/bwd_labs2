@@ -4,25 +4,21 @@ import { authService } from './auth';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const eventsService = {
-  async getEvents() {
-    const response = await axios.get(`${API_URL}/events`);
+  async getEvents(showDeleted: boolean = false) {
+    const endpoint = showDeleted ? '/events/all' : '/events';
+    const response = await axios.get(`${API_URL}${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${authService.getAuthToken()}`,
+      },
+    });
     return response.data;
   },
 
   async getEvent(id: number) {
     const response = await axios.get(`${API_URL}/events/${id}`, {
       headers: {
-        Authorization: `Bearer ${authService.getAuthToken()}`
-      }
-    });
-    return response.data;
-  },
-
-  async getAllEvents() {
-    const response = await axios.get(`${API_URL}/events/all`, {
-      headers: {
-        Authorization: `Bearer ${authService.getAuthToken()}`
-      }
+        Authorization: `Bearer ${authService.getAuthToken()}`,
+      },
     });
     return response.data;
   },
@@ -34,28 +30,35 @@ export const eventsService = {
   }) {
     const user = authService.getCurrentUser();
     if (!user) throw new Error('Пользователь не авторизован');
-  
-    const response = await axios.post(`${API_URL}/events`, {
-      ...eventData,
-      createdBy: user.id // Добавляем ID текущего пользователя
-    }, {
-      headers: {
-        Authorization: `Bearer ${authService.getAuthToken()}`
-      }
-    });
+
+    const response = await axios.post(
+      `${API_URL}/events`,
+      {
+        ...eventData,
+        createdBy: user.id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authService.getAuthToken()}`,
+        },
+      },
+    );
     return response.data;
   },
 
-  async updateEvent(id: number, eventData: {
-    title?: string;
-    description?: string;
-    date?: string;
-  }) {
+  async updateEvent(
+    id: number,
+    eventData: {
+      title?: string;
+      description?: string;
+      date?: string;
+    },
+  ) {
     const response = await axios.put(`${API_URL}/events/${id}`, eventData, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authService.getAuthToken()}`
-      }
+        Authorization: `Bearer ${authService.getAuthToken()}`,
+      },
     });
     return response.data;
   },
@@ -63,18 +66,22 @@ export const eventsService = {
   async deleteEvent(id: number) {
     const response = await axios.delete(`${API_URL}/events/${id}`, {
       headers: {
-        'Authorization': `Bearer ${authService.getAuthToken()}`,
+        Authorization: `Bearer ${authService.getAuthToken()}`,
       },
     });
     return response.data;
   },
 
   async restoreEvent(id: number) {
-    const response = await axios.post(`${API_URL}/events/${id}/restore`, {}, {
-      headers: {
-        Authorization: `Bearer ${authService.getAuthToken()}`
-      }
-    });
+    const response = await axios.post(
+      `${API_URL}/events/${id}/restore`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${authService.getAuthToken()}`,
+        },
+      },
+    );
     return response.data;
-  }
+  },
 };

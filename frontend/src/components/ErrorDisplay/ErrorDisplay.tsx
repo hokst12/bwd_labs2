@@ -8,11 +8,11 @@ interface ErrorDisplayProps {
   autoCloseDelay?: number;
 }
 
-export const ErrorDisplay = ({ 
-  error, 
-  statusCode, 
-  onClose, 
-  autoCloseDelay = 5000 
+export const ErrorDisplay = ({
+  error,
+  statusCode,
+  onClose,
+  autoCloseDelay = 5000,
 }: ErrorDisplayProps) => {
   const [isClosing, setIsClosing] = useState(false);
 
@@ -28,14 +28,14 @@ export const ErrorDisplay = ({
       const timer = setTimeout(() => {
         handleClose();
       }, autoCloseDelay);
-      
+
       return () => clearTimeout(timer);
     }
   }, [autoCloseDelay, onClose]);
 
   const handleClose = () => {
     if (!onClose) return;
-    
+
     setIsClosing(true);
     setTimeout(() => {
       onClose();
@@ -44,7 +44,7 @@ export const ErrorDisplay = ({
 
   return (
     <div className={styles['error-notification']}>
-      <div 
+      <div
         className={`${styles['error-content']} ${styles[getErrorType()]} ${
           isClosing ? styles['closing'] : ''
         }`}
@@ -58,8 +58,8 @@ export const ErrorDisplay = ({
         )}
         <div className={styles['error-message']}>{error}</div>
         {onClose && (
-          <button 
-            className={styles['close-btn']} 
+          <button
+            className={styles['close-btn']}
             onClick={handleClose}
             aria-label="Закрыть уведомление"
           >

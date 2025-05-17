@@ -64,3 +64,24 @@
 .danger:hover {
   background-color: #dc2626;
 }
+
+.button.success {
+  background-color: #4caf50;
+  color: white;
+  border: 1px solid #4caf50;
+}
+
+.button.success:hover {
+  background-color: #3e8e41;
+  border-color: #3e8e41;
+}
+
+.button.success:active {
+  background-color: #2d6a2f;
+}
+
+.button.success:disabled {
+  background-color: #a5d6a7;
+  border-color: #a5d6a7;
+  cursor: not-allowed;
+}

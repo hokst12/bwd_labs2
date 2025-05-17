@@ -12,9 +12,12 @@ export const EventForm = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    date: ''
+    date: '',
   });
-  const [error, setError] = useState<{message: string, statusCode?: number} | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    statusCode?: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const isEditMode = Boolean(id);
 
@@ -26,10 +29,11 @@ export const EventForm = () => {
           setFormData({
             title: event.title,
             description: event.description || '',
-            date: event.date.split('T')[0]
+            date: event.date.split('T')[0],
           });
         } catch (err: any) {
-          const errorMessage = err.response?.data?.message || 'Не удалось загрузить мероприятие';
+          const errorMessage =
+            err.response?.data?.message || 'Не удалось загрузить мероприятие';
           const statusCode = err.response?.status || 500;
           setError({ message: errorMessage, statusCode });
         }
@@ -42,7 +46,7 @@ export const EventForm = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const user = authService.getCurrentUser();
       if (!user) throw new Error('Пользователь не авторизован');
@@ -51,42 +55,48 @@ export const EventForm = () => {
         await eventsService.updateEvent(Number(id), {
           title: formData.title,
           description: formData.description,
-          date: formData.date
+          date: formData.date,
         });
       } else {
         await eventsService.createEvent({
           title: formData.title,
           description: formData.description,
-          date: formData.date
+          date: formData.date,
         });
       }
-      
+
       navigate('/events');
     } catch (err: any) {
-      let errorMessage = err instanceof Error ? err.message : 
-        isEditMode ? 'Не удалось обновить мероприятие' : 'Не удалось создать мероприятие';
+      let errorMessage =
+        err instanceof Error
+          ? err.message
+          : isEditMode
+            ? 'Не удалось обновить мероприятие'
+            : 'Не удалось создать мероприятие';
       const statusCode = err.response?.status || 500;
-      
+
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       }
-      
+
       setError({ message: errorMessage, statusCode });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
     <>
       {/* ErrorDisplay теперь рендерится отдельно от формы */}
       {error && (
-        <ErrorDisplay 
+        <ErrorDisplay
           error={error.message}
           statusCode={error.statusCode}
           onClose={() => setError(null)}
@@ -95,7 +105,7 @@ export const EventForm = () => {
 
       <div className={styles.formContainer}>
         <h2>{isEditMode ? 'Редактирование' : 'Создание'} мероприятия</h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="title">Название</label>
@@ -108,7 +118,7 @@ export const EventForm = () => {
               required
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="description">Описание</label>
             <textarea
@@ -119,7 +129,7 @@ export const EventForm = () => {
               rows={4}
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="date">Дата</label>
             <input
@@ -131,17 +141,17 @@ export const EventForm = () => {
               required
             />
           </div>
-          
+
           <div className={styles.formActions}>
             <Button type="button" onClick={() => navigate('/events')}>
               Отмена
             </Button>
-            <Button 
-              type="submit" 
-              variant="primary" 
-              disabled={isLoading}
-            >
-              {isLoading ? 'Сохранение...' : isEditMode ? 'Обновить' : 'Создать'}
+            <Button type="submit" variant="primary" disabled={isLoading}>
+              {isLoading
+                ? 'Сохранение...'
+                : isEditMode
+                  ? 'Обновить'
+                  : 'Создать'}
             </Button>
           </div>
         </form>
