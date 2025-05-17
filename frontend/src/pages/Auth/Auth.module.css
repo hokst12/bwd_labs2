@@ -1,0 +1,119 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.form {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #2d3748;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.registerLink {
+  margin-top: 1.75rem;
+  text-align: center;
+  color: #718096;
+  font-size: 0.95rem;
+}
+
+.registerLink a {
+  color: #667eea;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.registerLink a:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+.error {
+  color: #e53e3e;
+  background-color: #fff5f5;
+  padding: 0.75rem;
+  margin-bottom: 1.25rem;
+  border-radius: 6px;
+  border: 1px solid #fed7d7;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .form {
+    padding: 1.75rem;
+    border-radius: 12px;
+  }
+
+  .mainContent {
+    padding: 1rem;
+  }
+}
+
+.successMessage {
+  color: #38a169;
+  background-color: #f0fff4;
+  padding: 0.75rem;
+  margin-bottom: 1.25rem;
+  border-radius: 6px;
+  border: 1px solid #c6f6d5;
+  text-align: center;
+  font-size: 0.9rem;
+}
