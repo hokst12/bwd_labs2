@@ -4,7 +4,11 @@ import { Header } from '../../components/Header';
 import { Button } from '../../components/Button';
 import { ErrorDisplay } from '../../components/ErrorDisplay/ErrorDisplay';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { register, clearError, setMessage } from '../../features/auth/authSlice';
+import {
+  register,
+  clearError,
+  setMessage,
+} from '../../features/auth/authSlice';
 import styles from './Register.module.css';
 
 export const Register = () => {
@@ -45,7 +49,7 @@ export const Register = () => {
         email: formData.email,
         name: formData.name,
         password: formData.password,
-      })
+      }),
     );
 
     if (register.fulfilled.match(resultAction)) {

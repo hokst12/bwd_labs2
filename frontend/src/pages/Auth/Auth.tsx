@@ -4,7 +4,12 @@ import { Header } from '../../components/Header';
 import { Button } from '../../components/Button';
 import { ErrorDisplay } from '../../components/ErrorDisplay/ErrorDisplay';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { login, clearError, clearMessage, setMessage } from '../../features/auth/authSlice';
+import {
+  login,
+  clearError,
+  clearMessage,
+  setMessage,
+} from '../../features/auth/authSlice';
 import styles from './Auth.module.css';
 
 export const Auth = () => {
@@ -14,7 +19,9 @@ export const Auth = () => {
   });
 
   const dispatch = useAppDispatch();
-  const { user, loading, error, message } = useAppSelector((state) => state.auth);
+  const { user, loading, error, message } = useAppSelector(
+    (state) => state.auth,
+  );
   const navigate = useNavigate();
   const location = useLocation();
 

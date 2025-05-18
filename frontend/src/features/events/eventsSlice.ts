@@ -1,13 +1,26 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 import { eventsService } from '../../api/events';
 
-interface Event {
+interface Participant {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// Обновлённый интерфейс мероприятия
+export interface Event {
   id: number;
   title: string;
   description: string | null;
   date: string;
   createdBy: number;
   deletedAt: string | null;
+  participantsCount: number;
+  participants?: Participant[];
   creator?: {
     id: number;
     name: string;
@@ -15,6 +28,7 @@ interface Event {
   };
 }
 
+// Состояние хранилища
 interface EventsState {
   events: Event[];
   currentEvent: Event | null;
@@ -22,6 +36,8 @@ interface EventsState {
   error: string | null;
   errorStatusCode?: number;
   showDeleted: boolean;
+  participants: Participant[];
+  participantsLoading: boolean;
 }
 
 const initialState: EventsState = {
@@ -31,6 +47,8 @@ const initialState: EventsState = {
   error: null,
   errorStatusCode: undefined,
   showDeleted: false,
+  participants: [],
+  participantsLoading: false,
 };
 
 export const fetchEvents = createAsyncThunk(
@@ -41,21 +59,70 @@ export const fetchEvents = createAsyncThunk(
     } catch (error: any) {
       let errorMessage = error.message;
       let statusCode;
-      
+
       if (error.response) {
         statusCode = error.response.status;
         errorMessage = error.response.data?.message || errorMessage;
       } else if (error.code === 'ERR_NETWORK') {
         statusCode = 503;
-        errorMessage = 'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
+        errorMessage =
+          'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
       }
-      
+
       return rejectWithValue({
         message: errorMessage,
-        statusCode
+        statusCode,
       });
     }
-  }
+  },
+);
+
+export const subscribeToEvent = createAsyncThunk(
+  'events/subscribeToEvent',
+  async (
+    { eventId, userId }: { eventId: number; userId: number },
+    { rejectWithValue },
+  ) => {
+    try {
+      return await eventsService.subscribeToEvent(eventId, userId);
+    } catch (error: any) {
+      return rejectWithValue({
+        message: error.response?.data?.message || error.message,
+        statusCode: error.response?.status,
+      });
+    }
+  },
+);
+
+export const unsubscribeFromEvent = createAsyncThunk(
+  'events/unsubscribeFromEvent',
+  async (
+    { eventId, userId }: { eventId: number; userId: number },
+    { rejectWithValue },
+  ) => {
+    try {
+      return await eventsService.unsubscribeFromEvent(eventId, userId);
+    } catch (error: any) {
+      return rejectWithValue({
+        message: error.response?.data?.message || error.message,
+        statusCode: error.response?.status,
+      });
+    }
+  },
+);
+
+export const fetchEventParticipants = createAsyncThunk(
+  'events/fetchEventParticipants',
+  async (eventId: number, { rejectWithValue }) => {
+    try {
+      return await eventsService.getEventParticipants(eventId);
+    } catch (error: any) {
+      return rejectWithValue({
+        message: error.response?.data?.message || error.message,
+        statusCode: error.response?.status,
+      });
+    }
+  },
 );
 
 export const fetchEventById = createAsyncThunk(
@@ -66,71 +133,86 @@ export const fetchEventById = createAsyncThunk(
     } catch (error: any) {
       let errorMessage = error.message;
       let statusCode;
-      
+
       if (error.response) {
         statusCode = error.response.status;
         errorMessage = error.response.data?.message || errorMessage;
       } else if (error.code === 'ERR_NETWORK') {
         statusCode = 503;
-        errorMessage = 'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
+        errorMessage =
+          'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
       }
-      
+
       return rejectWithValue({
         message: errorMessage,
-        statusCode
+        statusCode,
       });
     }
-  }
+  },
 );
 
 export const createEvent = createAsyncThunk(
   'events/createEvent',
-  async (eventData: { title: string; description?: string; date: string }, { rejectWithValue }) => {
+  async (
+    eventData: { title: string; description?: string; date: string },
+    { rejectWithValue },
+  ) => {
     try {
       return await eventsService.createEvent(eventData);
     } catch (error: any) {
       let errorMessage = error.message;
       let statusCode;
-      
+
       if (error.response) {
         statusCode = error.response.status;
         errorMessage = error.response.data?.message || errorMessage;
       } else if (error.code === 'ERR_NETWORK') {
         statusCode = 503;
-        errorMessage = 'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
+        errorMessage =
+          'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
       }
-      
+
       return rejectWithValue({
         message: errorMessage,
-        statusCode
+        statusCode,
       });
     }
-  }
+  },
 );
 
 export const updateEvent = createAsyncThunk(
   'events/updateEvent',
-  async ({ id, eventData }: { id: number; eventData: { title?: string; description?: string; date?: string } }, { rejectWithValue }) => {
+  async (
+    {
+      id,
+      eventData,
+    }: {
+      id: number;
+      eventData: { title?: string; description?: string; date?: string };
+    },
+    { rejectWithValue },
+  ) => {
     try {
       return await eventsService.updateEvent(id, eventData);
     } catch (error: any) {
       let errorMessage = error.message;
       let statusCode;
-      
+
       if (error.response) {
         statusCode = error.response.status;
         errorMessage = error.response.data?.message || errorMessage;
       } else if (error.code === 'ERR_NETWORK') {
         statusCode = 503;
-        errorMessage = 'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
+        errorMessage =
+          'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
       }
-      
+
       return rejectWithValue({
         message: errorMessage,
-        statusCode
+        statusCode,
       });
     }
-  }
+  },
 );
 
 export const deleteEvent = createAsyncThunk(
@@ -142,21 +224,22 @@ export const deleteEvent = createAsyncThunk(
     } catch (error: any) {
       let errorMessage = error.message;
       let statusCode;
-      
+
       if (error.response) {
         statusCode = error.response.status;
         errorMessage = error.response.data?.message || errorMessage;
       } else if (error.code === 'ERR_NETWORK') {
         statusCode = 503;
-        errorMessage = 'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
+        errorMessage =
+          'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
       }
-      
+
       return rejectWithValue({
         message: errorMessage,
-        statusCode
+        statusCode,
       });
     }
-  }
+  },
 );
 
 export const restoreEvent = createAsyncThunk(
@@ -168,21 +251,22 @@ export const restoreEvent = createAsyncThunk(
     } catch (error: any) {
       let errorMessage = error.message;
       let statusCode;
-      
+
       if (error.response) {
         statusCode = error.response.status;
         errorMessage = error.response.data?.message || errorMessage;
       } else if (error.code === 'ERR_NETWORK') {
         statusCode = 503;
-        errorMessage = 'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
+        errorMessage =
+          'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
       }
-      
+
       return rejectWithValue({
         message: errorMessage,
-        statusCode
+        statusCode,
       });
     }
-  }
+  },
 );
 
 const eventsSlice = createSlice({
@@ -196,9 +280,15 @@ const eventsSlice = createSlice({
       state.error = null;
       state.errorStatusCode = undefined;
     },
-    setError(state, action: PayloadAction<{message: string, statusCode?: number}>) {
+    setError(
+      state,
+      action: PayloadAction<{ message: string; statusCode?: number }>,
+    ) {
       state.error = action.payload.message;
       state.errorStatusCode = action.payload.statusCode;
+    },
+    clearParticipants(state) {
+      state.participants = [];
     },
   },
   extraReducers: (builder) => {
@@ -208,13 +298,52 @@ const eventsSlice = createSlice({
         state.error = null;
         state.errorStatusCode = undefined;
       })
+      .addCase(subscribeToEvent.fulfilled, (state, action) => {
+        const { eventId, subscribersCount } = action.payload;
+        const event = state.events.find((e) => e.id === eventId);
+        if (event) {
+          event.participantsCount = subscribersCount;
+        }
+        if (state.currentEvent && state.currentEvent.id === eventId) {
+          state.currentEvent.participantsCount = subscribersCount;
+        }
+      })
+      .addCase(unsubscribeFromEvent.fulfilled, (state, action) => {
+        const { eventId, subscribersCount } = action.payload;
+        const event = state.events.find((e) => e.id === eventId);
+        if (event) {
+          event.participantsCount = subscribersCount;
+        }
+        if (state.currentEvent && state.currentEvent.id === eventId) {
+          state.currentEvent.participantsCount = subscribersCount;
+        }
+      })
+      .addCase(fetchEventParticipants.pending, (state) => {
+        state.participantsLoading = true;
+      })
+      .addCase(fetchEventParticipants.fulfilled, (state, action) => {
+        state.participantsLoading = false;
+        state.participants = action.payload.participants;
+      })
+      .addCase(fetchEventParticipants.rejected, (state, action) => {
+        state.participantsLoading = false;
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
+        state.error = payload.message;
+        state.errorStatusCode = payload.statusCode;
+      })
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.loading = false;
         state.events = action.payload;
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
-        const payload = action.payload as { message: string, statusCode?: number };
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
         state.error = payload.message;
         state.errorStatusCode = payload.statusCode;
       })
@@ -229,7 +358,10 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchEventById.rejected, (state, action) => {
         state.loading = false;
-        const payload = action.payload as { message: string, statusCode?: number };
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
         state.error = payload.message;
         state.errorStatusCode = payload.statusCode;
       })
@@ -244,7 +376,10 @@ const eventsSlice = createSlice({
       })
       .addCase(createEvent.rejected, (state, action) => {
         state.loading = false;
-        const payload = action.payload as { message: string, statusCode?: number };
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
         state.error = payload.message;
         state.errorStatusCode = payload.statusCode;
       })
@@ -255,14 +390,17 @@ const eventsSlice = createSlice({
       })
       .addCase(updateEvent.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.events.findIndex(e => e.id === action.payload.id);
+        const index = state.events.findIndex((e) => e.id === action.payload.id);
         if (index !== -1) {
           state.events[index] = action.payload;
         }
       })
       .addCase(updateEvent.rejected, (state, action) => {
         state.loading = false;
-        const payload = action.payload as { message: string, statusCode?: number };
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
         state.error = payload.message;
         state.errorStatusCode = payload.statusCode;
       })
@@ -273,14 +411,17 @@ const eventsSlice = createSlice({
       })
       .addCase(deleteEvent.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.events.findIndex(e => e.id === action.payload);
+        const index = state.events.findIndex((e) => e.id === action.payload);
         if (index !== -1) {
           state.events[index].deletedAt = new Date().toISOString();
         }
       })
       .addCase(deleteEvent.rejected, (state, action) => {
         state.loading = false;
-        const payload = action.payload as { message: string, statusCode?: number };
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
         state.error = payload.message;
         state.errorStatusCode = payload.statusCode;
       })
@@ -291,19 +432,23 @@ const eventsSlice = createSlice({
       })
       .addCase(restoreEvent.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.events.findIndex(e => e.id === action.payload);
+        const index = state.events.findIndex((e) => e.id === action.payload);
         if (index !== -1) {
           state.events[index].deletedAt = null;
         }
       })
       .addCase(restoreEvent.rejected, (state, action) => {
         state.loading = false;
-        const payload = action.payload as { message: string, statusCode?: number };
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
         state.error = payload.message;
         state.errorStatusCode = payload.statusCode;
       });
   },
 });
 
-export const { toggleShowDeleted, clearError, setError } = eventsSlice.actions;
+export const { toggleShowDeleted, clearError, setError, clearParticipants } =
+  eventsSlice.actions;
 export default eventsSlice.reducer;

@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 interface User {
-  id: number;  // Добавляем id в интерфейс User
+  id: number; // Добавляем id в интерфейс User
   name: string;
   email: string;
 }
@@ -17,18 +17,18 @@ interface RegisterResponse {
 
 interface LoginResponse {
   token: string;
-  user: User;  // Теперь user включает id
+  user: User; // Теперь user включает id
 }
 
 export const authService = {
   async register(
     email: string,
     name: string,
-    password: string
+    password: string,
   ): Promise<RegisterResponse> {
     const response = await axios.post<RegisterResponse>(
       `${API_URL}/auth/register`,
-      { email, name, password }
+      { email, name, password },
     );
     return response.data;
   },

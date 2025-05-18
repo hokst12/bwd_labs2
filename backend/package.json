@@ -11,6 +11,11 @@
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register index.ts",
     "prepare": "husky install"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "lint-staged": {
     "*.ts": [
       "npm run lint",

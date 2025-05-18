@@ -9,25 +9,28 @@ export const usersApi = {
   getUserInfo: async (userId: number): Promise<UserInfo> => {
     const response = await axios.get(`${API_URL}/users/info/${userId}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('authToken')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+      },
     });
     return response.data;
   },
 
   getUserEvents: async (userId: number): Promise<Event[]> => {
-    const response = await axios.get(`${API_URL}/users/${userId}/created-events`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
+    const response = await axios.get(
+      `${API_URL}/users/${userId}/created-events`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      },
+    );
     return response.data;
   },
   getCachedUserInfo: async (userId: number): Promise<string> => {
     if (userInfoCache.has(userId)) {
       return userInfoCache.get(userId)!;
     }
-    
+
     try {
       const user = await usersApi.getUserInfo(userId);
       userInfoCache.set(userId, user.name);
@@ -35,5 +38,5 @@ export const usersApi = {
     } catch {
       return 'Неизвестен';
     }
-  }
+  },
 };

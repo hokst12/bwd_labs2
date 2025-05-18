@@ -12,11 +12,11 @@ interface EventCardProps {
   currentUserId?: number;
 }
 
-export const EventCard = ({ 
-  event, 
-  showCreator = true, 
+export const EventCard = ({
+  event,
+  showCreator = true,
   showActions = false,
-  currentUserId
+  currentUserId,
 }: EventCardProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -38,7 +38,9 @@ export const EventCard = ({
   const isOwner = currentUserId === event.createdBy;
 
   return (
-    <div className={`${styles.eventCard} ${event.deletedAt ? styles.deletedEvent : ''}`}>
+    <div
+      className={`${styles.eventCard} ${event.deletedAt ? styles.deletedEvent : ''}`}
+    >
       <div className={styles.eventImage}>
         <span className={styles.eventDateBadge}>
           {new Date(event.date).toLocaleDateString('ru-RU', {
@@ -58,18 +60,18 @@ export const EventCard = ({
         {event.description && (
           <p className={styles.eventDescription}>{event.description}</p>
         )}
-        
+
         <div className={styles.eventFooter}>
           {showCreator && (
             <span className={styles.eventCreator}>
               <span>👤</span> {event.creator?.name || 'Вы'}
             </span>
           )}
-          
+
           {showActions && isOwner && (
             <div className={styles.eventActions}>
               {event.deletedAt ? (
-                <Button 
+                <Button
                   onClick={handleRestore}
                   variant="success"
                   className={styles.actionButton}
@@ -78,14 +80,14 @@ export const EventCard = ({
                 </Button>
               ) : (
                 <>
-                  <Button 
+                  <Button
                     onClick={handleEdit}
                     variant="secondary"
                     className={styles.actionButton}
                   >
                     Редактировать
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleDelete}
                     variant="danger"
                     className={styles.actionButton}

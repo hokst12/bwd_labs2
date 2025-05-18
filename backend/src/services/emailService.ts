@@ -51,7 +51,7 @@ export const emailService = {
       console.log('Email sent:', info.messageId);
       return true;
     } catch {
-      console.log('Could not sent sent email to adress:', email);
+      console.log('Could not sent send email to adress:', email);
       return false;
     }
   },

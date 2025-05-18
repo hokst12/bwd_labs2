@@ -28,7 +28,7 @@ export const fetchUserInfo = createAsyncThunk(
         statusCode: error.response?.status,
       });
     }
-  }
+  },
 );
 
 export const fetchUserEvents = createAsyncThunk(
@@ -42,7 +42,7 @@ export const fetchUserEvents = createAsyncThunk(
         statusCode: error.response?.status,
       });
     }
-  }
+  },
 );
 
 const userSlice = createSlice({
@@ -66,8 +66,10 @@ const userSlice = createSlice({
       .addCase(fetchUserInfo.rejected, (state, action) => {
         state.loading = false;
         state.error = {
-          message: (action.payload as any)?.message || 'Ошибка загрузки данных пользователя',
-          statusCode: (action.payload as any)?.statusCode
+          message:
+            (action.payload as any)?.message ||
+            'Ошибка загрузки данных пользователя',
+          statusCode: (action.payload as any)?.statusCode,
         };
       })
       .addCase(fetchUserEvents.pending, (state) => {
@@ -81,10 +83,11 @@ const userSlice = createSlice({
       .addCase(fetchUserEvents.rejected, (state, action) => {
         state.loading = false;
         state.error = {
-          message: (action.payload as any)?.message || 'Ошибка загрузки мероприятий',
-          statusCode: (action.payload as any)?.statusCode
+          message:
+            (action.payload as any)?.message || 'Ошибка загрузки мероприятий',
+          statusCode: (action.payload as any)?.statusCode,
         };
-      })
+      });
   },
 });
 

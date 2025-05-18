@@ -1,34 +1,39 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../../components/Button';
 import { ErrorDisplay } from '../../../components/ErrorDisplay/ErrorDisplay';
 import styles from '../Events.module.css';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { 
-  fetchEvents, 
-  deleteEvent, 
-  restoreEvent, 
-  toggleShowDeleted, 
-  clearError 
+import {
+  fetchEvents,
+  deleteEvent,
+  restoreEvent,
+  toggleShowDeleted,
+  clearError,
+  subscribeToEvent,
+  unsubscribeFromEvent,
+  fetchEventParticipants,
+  clearParticipants,
+  type Event,
 } from '../../../features/events/eventsSlice';
 import { authService } from '../../../api/auth';
+import { ParticipantsModal } from './ParticipantsModal';
 
 export const EventsList = () => {
   const dispatch = useAppDispatch();
-  const { 
-    events, 
-    loading, 
-    error, 
-    errorStatusCode, // Добавляем получение кода ошибки
-    showDeleted 
-  } = useAppSelector((state) => state.events);
+  const { events, loading, error, errorStatusCode, showDeleted, participants } =
+    useAppSelector((state) => state.events);
   const currentUser = authService.getCurrentUser();
-  
+  const [showParticipantsModal, setShowParticipantsModal] = useState<
+    number | null
+  >(null);
+
+  // Получаем актуальные данные о мероприятиях
   useEffect(() => {
     dispatch(fetchEvents(showDeleted));
   }, [dispatch, showDeleted]);
 
-  const sortedEvents = [...events].sort((a, b) => {
+  const sortedEvents = [...events].sort((a: Event, b: Event) => {
     if (a.deletedAt && !b.deletedAt) return 1;
     if (!a.deletedAt && b.deletedAt) return -1;
     return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -43,10 +48,51 @@ export const EventsList = () => {
     dispatch(restoreEvent(id));
   };
 
+  const handleSubscribe = async (eventId: number) => {
+    if (!currentUser) return;
+    try {
+      await dispatch(
+        subscribeToEvent({
+          eventId,
+          userId: currentUser.id,
+        }),
+      ).unwrap();
+      // После успешной подписки обновляем данные
+      dispatch(fetchEvents(showDeleted));
+    } catch (error) {
+      console.error('Ошибка подписки:', error);
+    }
+  };
+
+  const handleUnsubscribe = async (eventId: number) => {
+    if (!currentUser) return;
+    try {
+      await dispatch(
+        unsubscribeFromEvent({
+          eventId,
+          userId: currentUser.id,
+        }),
+      ).unwrap();
+      // После успешной отписки обновляем данные
+      dispatch(fetchEvents(showDeleted));
+    } catch (error) {
+      console.error('Ошибка отписки:', error);
+    }
+  };
+
+  // Проверяем, подписан ли текущий пользователь на мероприятие
+  const isUserSubscribed = (event: Event) => {
+    if (!currentUser || !event.participants) return false;
+    return event.participants.some((p) => p.id === currentUser.id);
+  };
+
   if (loading) {
     return (
       <div className={styles.mainContent}>
-        <div className={styles.card} style={{ textAlign: 'center', padding: '3rem' }}>
+        <div
+          className={styles.card}
+          style={{ textAlign: 'center', padding: '3rem' }}
+        >
           Загрузка мероприятий...
         </div>
       </div>
@@ -56,13 +102,13 @@ export const EventsList = () => {
   return (
     <div className={styles.mainContent}>
       {error && (
-  <ErrorDisplay
-    error={error}
-    statusCode={errorStatusCode}
-    onClose={() => dispatch(clearError())}
-    autoCloseDelay={5000}
-  />
-)}
+        <ErrorDisplay
+          error={error}
+          statusCode={errorStatusCode}
+          onClose={() => dispatch(clearError())}
+          autoCloseDelay={5000}
+        />
+      )}
 
       <div className={styles.eventsHeader}>
         <h1 className={styles.eventsTitle}>Мероприятия</h1>
@@ -90,15 +136,19 @@ export const EventsList = () => {
       </div>
 
       {sortedEvents.length === 0 ? (
-        <div className={styles.card} style={{ textAlign: 'center', padding: '3rem' }}>
+        <div
+          className={styles.card}
+          style={{ textAlign: 'center', padding: '3rem' }}
+        >
           {showDeleted
             ? 'Нет удалённых мероприятий'
             : 'Нет доступных мероприятий'}
         </div>
       ) : (
         <div className={styles.eventsGrid}>
-          {sortedEvents.map((event, index) => {
-            const showDivider = event.deletedAt && 
+          {sortedEvents.map((event: Event, index) => {
+            const showDivider =
+              event.deletedAt &&
               (index === 0 || !sortedEvents[index - 1].deletedAt);
 
             return (
@@ -110,7 +160,9 @@ export const EventsList = () => {
                     </div>
                   </div>
                 )}
-                <div className={`${styles.eventCard} ${event.deletedAt ? styles.deletedEvent : ''}`}>
+                <div
+                  className={`${styles.eventCard} ${event.deletedAt ? styles.deletedEvent : ''}`}
+                >
                   <div className={styles.eventImage}>
                     <span className={styles.eventDateBadge}>
                       {new Date(event.date).toLocaleDateString('ru-RU', {
@@ -121,20 +173,32 @@ export const EventsList = () => {
                     </span>
                     {event.deletedAt && (
                       <span className={styles.deletedBadge}>
-                        Удалено: {new Date(event.deletedAt).toLocaleDateString('ru-RU')}
+                        Удалено:{' '}
+                        {new Date(event.deletedAt).toLocaleDateString('ru-RU')}
                       </span>
                     )}
                   </div>
                   <div className={styles.eventContent}>
                     <h3 className={styles.eventTitle}>{event.title}</h3>
                     {event.description && (
-                      <p className={styles.eventDescription}>{event.description}</p>
+                      <p className={styles.eventDescription}>
+                        {event.description}
+                      </p>
                     )}
                     <div className={styles.eventFooter}>
-                      <span className={styles.eventCreator}>
-                        <span>👤</span> {event.creator?.name || 'Неизвестен'}
-                      </span>
-                      {currentUser?.id === event.createdBy && (
+                      <div className={styles.eventInfo}>
+                        <span className={styles.eventCreator}>
+                          <span>👤</span> {event.creator?.name || 'Неизвестен'}
+                        </span>
+                        <button
+                          className={styles.participantsCount}
+                          onClick={() => setShowParticipantsModal(event.id)}
+                        >
+                          <span>👥</span> {event.participantsCount} участники
+                        </button>
+                      </div>
+
+                      {currentUser?.id === event.createdBy ? (
                         <div className={styles.eventActions}>
                           {event.deletedAt ? (
                             <Button
@@ -160,6 +224,27 @@ export const EventsList = () => {
                             </>
                           )}
                         </div>
+                      ) : (
+                        !event.deletedAt &&
+                        currentUser && (
+                          <div className={styles.eventActions}>
+                            {isUserSubscribed(event) ? (
+                              <Button
+                                onClick={() => handleUnsubscribe(event.id)}
+                                variant="secondary"
+                              >
+                                Отписаться
+                              </Button>
+                            ) : (
+                              <Button
+                                onClick={() => handleSubscribe(event.id)}
+                                variant="primary"
+                              >
+                                Подписаться
+                              </Button>
+                            )}
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
@@ -168,6 +253,16 @@ export const EventsList = () => {
             );
           })}
         </div>
+      )}
+
+      {showParticipantsModal && (
+        <ParticipantsModal
+          eventId={showParticipantsModal}
+          onClose={() => {
+            setShowParticipantsModal(null);
+            dispatch(clearParticipants());
+          }}
+        />
       )}
     </div>
   );

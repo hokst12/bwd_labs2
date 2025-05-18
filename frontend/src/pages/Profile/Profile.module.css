@@ -1,102 +1,102 @@
 /* src/pages/Profile/Profile.module.css */
 .pageContainer {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    display: flex;
-    flex-direction: column;
-  }
-  
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  flex: 1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profileContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.profileCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+}
+
+.profileTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+}
+
+.infoLabel {
+  font-weight: 500;
+  color: #4a5568;
+  min-width: 100px;
+}
+
+.infoValue {
+  color: #1a202c;
+  font-weight: 400;
+}
+
+.eventsSection {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 1.5rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+}
+
+.noEvents {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+}
+
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
   .mainContent {
-    flex: 1;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
+    padding: 1.5rem;
   }
-  
-  .profileContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  
-  .profileCard {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-    padding: 2rem;
-  }
-  
-  .profileTitle {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #1a202c;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #edf2f7;
-  }
-  
-  .userInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-  
-  .infoRow {
-    display: flex;
-    align-items: center;
-  }
-  
-  .infoLabel {
-    font-weight: 500;
-    color: #4a5568;
-    min-width: 100px;
-  }
-  
-  .infoValue {
-    color: #1a202c;
-    font-weight: 400;
-  }
-  
+
+  .profileCard,
   .eventsSection {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-    padding: 2rem;
+    padding: 1.5rem;
   }
-  
-  .sectionTitle {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1a202c;
-    margin-bottom: 1.5rem;
-  }
-  
-  .loading {
-    text-align: center;
-    padding: 2rem;
-    color: #718096;
-  }
-  
-  .noEvents {
-    text-align: center;
-    padding: 2rem;
-    color: #718096;
-  }
-  
-  .eventsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 2rem;
-  }
-  
-  @media (max-width: 768px) {
-    .mainContent {
-      padding: 1.5rem;
-    }
-  
-    .profileCard,
-    .eventsSection {
-      padding: 1.5rem;
-    }
-  }
+}

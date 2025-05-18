@@ -1,4 +1,8 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 import { authService } from '../../api/auth';
 
 interface User {
@@ -31,15 +35,19 @@ const initialState: AuthState = {
 export const register = createAsyncThunk(
   'auth/register',
   async (
-    { email, name, password }: { email: string; name: string; password: string },
-    { rejectWithValue }
+    {
+      email,
+      name,
+      password,
+    }: { email: string; name: string; password: string },
+    { rejectWithValue },
   ) => {
     try {
       const response = await authService.register(email, name, password);
       return {
         id: response.id,
         name: response.name,
-        email: response.email
+        email: response.email,
       };
     } catch (error: any) {
       return rejectWithValue({
@@ -47,14 +55,14 @@ export const register = createAsyncThunk(
         statusCode: error.response?.status || 500,
       });
     }
-  }
+  },
 );
 
 export const login = createAsyncThunk(
   'auth/login',
   async (
     { email, password }: { email: string; password: string },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await authService.login(email, password);
@@ -65,7 +73,7 @@ export const login = createAsyncThunk(
         statusCode: error.response?.status || 500,
       });
     }
-  }
+  },
 );
 
 export const logout = createAsyncThunk('auth/logout', async () => {

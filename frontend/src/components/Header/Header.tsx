@@ -17,14 +17,16 @@ export const Header = () => {
       <Link to="/" className={styles.logo}>
         EventApp
       </Link>
-      
+
       <nav className={styles.nav}>
         {isAuth ? (
           <>
             <Link to="/events" className={styles.link}>
               Мероприятия
             </Link>
-            <span className={styles.username}><Link to="/Profile">{user?.name}</Link></span>
+            <span className={styles.username}>
+              <Link to="/Profile">{user?.name}</Link>
+            </span>
             <button onClick={handleLogout} className={styles.link}>
               Выйти
             </button>

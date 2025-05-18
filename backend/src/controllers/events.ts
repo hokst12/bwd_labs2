@@ -155,6 +155,103 @@ const eventsController = {
         details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
+  }) as unknown as RequestHandler,  
+
+  subscribeToEvent: (async (req: Request<{ id: string; }, unknown, { userId: number; }>, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const { userId } = req.body;
+
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return res.status(404).json({ error: 'Мероприятие не найдено' });
+      }
+
+      if (event.createdBy === userId) {
+        return res.status(400).json({ error: 'Создатель не может подписаться на собственное мероприятие' });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+      }
+
+      if (event.subscribers.includes(userId)) {
+        return res.status(400).json({ error: 'Пользователь уже подписан на это мероприятие' });
+      }
+
+      await event.update({
+        subscribers: [...event.subscribers, userId]
+      });
+
+      res.json({
+        message: 'Пользователь успешно подписан на мероприятие',
+        subscribersCount: event.subscribers.length + 1
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Ошибка при подписке на мероприятие',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }) as unknown as RequestHandler,
+
+  unsubscribeFromEvent: (async (req: Request<{ id: string; }, unknown, { userId: number; }>, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const { userId } = req.body;
+
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return res.status(404).json({ error: 'Мероприятие не найдено' });
+      }
+
+      if (!event.subscribers.includes(userId)) {
+        return res.status(400).json({ error: 'Пользователь не подписан на это мероприятие' });
+      }
+
+      await event.update({
+        subscribers: event.subscribers.filter(id => id !== userId)
+      });
+
+      res.json({
+        message: 'Пользователь успешно отписан от мероприятия',
+        subscribersCount: event.subscribers.length - 1
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Ошибка при отписке от мероприятия',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }) as unknown as RequestHandler,
+
+  getEventParticipants: (async (req: Request<{ id: string; }>, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.id);
+
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return res.status(404).json({ error: 'Мероприятие не найдено' });
+      }
+
+      const participants = await User.findAll({
+        where: { id: event.subscribers },
+        attributes: ['id', 'name', 'email'],
+      });
+
+      res.json({
+        eventId: event.id,
+        eventTitle: event.title,
+        participants,
+        participantsCount: participants.length
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Ошибка при получении участников мероприятия',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }) as unknown as RequestHandler,
 
   restoreEvent: (async (req: Request<{ id: string }>, res: Response) => {
@@ -195,6 +292,8 @@ const eventsController = {
       });
     }
   }) as unknown as RequestHandler,
+  
 };
+
 
 export default eventsController;

@@ -8,7 +8,9 @@ export const GuestRoute = ({ children }: { children: JSX.Element }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('Вы уже авторизованы. Перенаправление на страницу мероприятий...');
+      console.log(
+        'Вы уже авторизованы. Перенаправление на страницу мероприятий...',
+      );
     }
   }, [isAuthenticated]);
 

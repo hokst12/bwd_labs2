@@ -4,17 +4,20 @@ import { Button } from '../../../components/Button';
 import { ErrorDisplay } from '../../../components/ErrorDisplay/ErrorDisplay';
 import styles from '../Events.module.css';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { 
-  createEvent, 
-  updateEvent, 
+import {
+  createEvent,
+  updateEvent,
   clearError,
-  fetchEventById} from '../../../features/events/eventsSlice';
+  fetchEventById,
+} from '../../../features/events/eventsSlice';
 
 export const EventForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { error, loading, currentEvent,errorStatusCode, } = useAppSelector((state) => state.events);
+  const { error, loading, currentEvent, errorStatusCode } = useAppSelector(
+    (state) => state.events,
+  );
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -40,25 +43,31 @@ export const EventForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
 
-    const resultAction = isEditMode && id
-      ? await dispatch(updateEvent({
-          id: Number(id),
-          eventData: {
-            title: formData.title,
-            description: formData.description,
-            date: formData.date,
-          }
-        }))
-      : await dispatch(createEvent({
-          title: formData.title,
-          description: formData.description,
-          date: formData.date,
-        }));
+    const resultAction =
+      isEditMode && id
+        ? await dispatch(
+            updateEvent({
+              id: Number(id),
+              eventData: {
+                title: formData.title,
+                description: formData.description,
+                date: formData.date,
+              },
+            }),
+          )
+        : await dispatch(
+            createEvent({
+              title: formData.title,
+              description: formData.description,
+              date: formData.date,
+            }),
+          );
 
-    if (createEvent.fulfilled.match(resultAction) || 
-        updateEvent.fulfilled.match(resultAction)) {
+    if (
+      createEvent.fulfilled.match(resultAction) ||
+      updateEvent.fulfilled.match(resultAction)
+    ) {
       navigate('/events');
     }
   };
@@ -72,14 +81,14 @@ export const EventForm = () => {
 
   return (
     <>
-       {error && (
-  <ErrorDisplay
-    error={error}
-    statusCode={errorStatusCode}
-    onClose={() => dispatch(clearError())}
-    autoCloseDelay={5000}
-  />
-)}
+      {error && (
+        <ErrorDisplay
+          error={error}
+          statusCode={errorStatusCode}
+          onClose={() => dispatch(clearError())}
+          autoCloseDelay={5000}
+        />
+      )}
 
       <div className={styles.formContainer}>
         <h2>{isEditMode ? 'Редактирование' : 'Создание'} мероприятия</h2>
@@ -125,11 +134,7 @@ export const EventForm = () => {
               Отмена
             </Button>
             <Button type="submit" variant="primary" disabled={loading}>
-              {loading
-                ? 'Сохранение...'
-                : isEditMode
-                  ? 'Обновить'
-                  : 'Создать'}
+              {loading ? 'Сохранение...' : isEditMode ? 'Обновить' : 'Создать'}
             </Button>
           </div>
         </form>

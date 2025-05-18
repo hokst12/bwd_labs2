@@ -1,7 +1,11 @@
 // src/pages/Profile/Profile.tsx
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { fetchUserInfo, fetchUserEvents, clearUserError } from '../../features/user/userSlice';
+import {
+  fetchUserInfo,
+  fetchUserEvents,
+  clearUserError,
+} from '../../features/user/userSlice';
 import { authService } from '../../api/auth';
 import { Header } from '../../components/Header/Header';
 import { ErrorDisplay } from '../../components/ErrorDisplay/ErrorDisplay';
@@ -10,7 +14,9 @@ import { EventCard } from '../../components/EventCard/EventCard';
 
 export const Profile = () => {
   const dispatch = useAppDispatch();
-  const { info, events, loading, error } = useAppSelector((state) => state.user);
+  const { info, events, loading, error } = useAppSelector(
+    (state) => state.user,
+  );
   const currentUser = authService.getCurrentUser();
 
   useEffect(() => {
@@ -33,21 +39,21 @@ export const Profile = () => {
   return (
     <div className={styles.pageContainer}>
       <Header />
-      
+
       <main className={styles.mainContent}>
         <div className={styles.profileContainer}>
-        {error && (
-        <ErrorDisplay
-          error={error.message}
-          statusCode={error.statusCode || 500}
-          onClose={() => dispatch(clearUserError())}
-          autoCloseDelay={5000}
-        />
-      )}
+          {error && (
+            <ErrorDisplay
+              error={error.message}
+              statusCode={error.statusCode || 500}
+              onClose={() => dispatch(clearUserError())}
+              autoCloseDelay={5000}
+            />
+          )}
 
           <div className={styles.profileCard}>
             <h2 className={styles.profileTitle}>Личный кабинет</h2>
-            
+
             {loading && !info ? (
               <div className={styles.loading}>Загрузка информации...</div>
             ) : (
@@ -77,14 +83,14 @@ export const Profile = () => {
             ) : (
               <div className={styles.eventsGrid}>
                 {sortedEvents.map((event) => (
-        <EventCard 
-          key={event.id}
-          event={event}
-          showCreator={false}
-          showActions={true}
-          currentUserId={currentUser?.id}
-        />
-      ))}
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    showCreator={false}
+                    showActions={true}
+                    currentUserId={currentUser?.id}
+                  />
+                ))}
               </div>
             )}
           </div>

@@ -1,5 +1,9 @@
 // src/app/hooks.ts
-import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import {
+  type TypedUseSelectorHook,
+  useDispatch,
+  useSelector,
+} from 'react-redux';
 import type { RootState, AppDispatch } from './store';
 
 // Типизированные хуки, которые можно использовать во всём приложении
