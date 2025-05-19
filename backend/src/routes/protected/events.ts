@@ -16,6 +16,28 @@ router.use(passport.authenticate('jwt', { session: false }));
 /**
  * @swagger
  * /events:
+ *   get:
+ *     summary: Получить список активных мероприятий
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список активных мероприятий
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Event'
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/', eventsController.getEvents);
+
+/**
+ * @swagger
+ * /events:
  *   post:
  *     summary: Создать новое мероприятие
  *     tags: [Events]

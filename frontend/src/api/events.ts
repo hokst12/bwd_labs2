@@ -11,7 +11,13 @@ export const eventsService = {
         Authorization: `Bearer ${authService.getAuthToken()}`,
       },
     });
-    return response.data;
+    
+    // Добавляем проверку наличия подписчиков
+    return response.data.map((event: { subscribers: string | any[]; }) => ({
+      ...event,
+      subscribers: event.subscribers || [],
+      participantsCount: event.subscribers?.length || 0
+    }));
   },
 
   async subscribeToEvent(eventId: number, userId: number) {
@@ -26,10 +32,13 @@ export const eventsService = {
     );
     return {
       ...response.data,
+      eventId,
       isSubscribed: true,
+      participantsCount: response.data.subscribersCount,
+      subscribers: response.data.subscribers || []
     };
   },
-
+  
   async unsubscribeFromEvent(eventId: number, userId: number) {
     const response = await axios.post(
       `${API_URL}/events/${eventId}/unsubscribe`,
@@ -42,7 +51,10 @@ export const eventsService = {
     );
     return {
       ...response.data,
+      eventId,
       isSubscribed: false,
+      participantsCount: response.data.subscribersCount,
+      subscribers: response.data.subscribers || []
     };
   },
 

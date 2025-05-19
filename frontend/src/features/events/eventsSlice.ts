@@ -11,7 +11,6 @@ interface Participant {
   email: string;
 }
 
-// Обновлённый интерфейс мероприятия
 export interface Event {
   id: number;
   title: string;
@@ -20,7 +19,9 @@ export interface Event {
   createdBy: number;
   deletedAt: string | null;
   participantsCount: number;
-  participants?: Participant[];
+  isSubscribed?: boolean;
+  subscribers?: number[]; // Массив ID подписчиков
+  participants?: Participant[]; // Полная информация о подписчиках
   creator?: {
     id: number;
     name: string;
@@ -86,9 +87,21 @@ export const subscribeToEvent = createAsyncThunk(
     try {
       return await eventsService.subscribeToEvent(eventId, userId);
     } catch (error: any) {
+      let errorMessage = error.message;
+      let statusCode;
+
+      if (error.response) {
+        statusCode = error.response.status;
+        errorMessage = 'ошибка подписки, вы уже подписаны';
+      } else if (error.code === 'ERR_NETWORK') {
+        statusCode = 503;
+        errorMessage =
+          'Сервер недоступен. Пожалуйста, проверьте подключение к интернету.';
+      }
+
       return rejectWithValue({
-        message: error.response?.data?.message || error.message,
-        statusCode: error.response?.status,
+        message: errorMessage,
+        statusCode,
       });
     }
   },
@@ -299,24 +312,48 @@ const eventsSlice = createSlice({
         state.errorStatusCode = undefined;
       })
       .addCase(subscribeToEvent.fulfilled, (state, action) => {
-        const { eventId, subscribersCount } = action.payload;
+        const { eventId, participantsCount, subscribers, isSubscribed } = action.payload;
         const event = state.events.find((e) => e.id === eventId);
         if (event) {
-          event.participantsCount = subscribersCount;
+          event.participantsCount = participantsCount;
+          event.subscribers = subscribers;
+          event.isSubscribed = isSubscribed;
         }
         if (state.currentEvent && state.currentEvent.id === eventId) {
-          state.currentEvent.participantsCount = subscribersCount;
+          state.currentEvent.participantsCount = participantsCount;
+          state.currentEvent.subscribers = subscribers;
+          state.currentEvent.isSubscribed = isSubscribed;
         }
       })
       .addCase(unsubscribeFromEvent.fulfilled, (state, action) => {
-        const { eventId, subscribersCount } = action.payload;
+        const { eventId, participantsCount, subscribers, isSubscribed } = action.payload;
         const event = state.events.find((e) => e.id === eventId);
         if (event) {
-          event.participantsCount = subscribersCount;
+          event.participantsCount = participantsCount;
+          event.subscribers = subscribers;
+          event.isSubscribed = isSubscribed;
         }
         if (state.currentEvent && state.currentEvent.id === eventId) {
-          state.currentEvent.participantsCount = subscribersCount;
+          state.currentEvent.participantsCount = participantsCount;
+          state.currentEvent.subscribers = subscribers;
+          state.currentEvent.isSubscribed = isSubscribed;
         }
+      })
+      .addCase(subscribeToEvent.rejected, (state, action) => {
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
+        state.error = payload.message;
+        state.errorStatusCode = payload.statusCode;
+      })
+      .addCase(unsubscribeFromEvent.rejected, (state, action) => {
+        const payload = action.payload as {
+          message: string;
+          statusCode?: number;
+        };
+        state.error = payload.message;
+        state.errorStatusCode = payload.statusCode;
       })
       .addCase(fetchEventParticipants.pending, (state) => {
         state.participantsLoading = true;
@@ -336,7 +373,11 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.loading = false;
-        state.events = action.payload;
+        state.events = action.payload.map((event: { subscribers: string | any[]; }) => ({
+          ...event,
+          participantsCount: event.subscribers?.length || 0,
+          subscribers: event.subscribers || []
+        }));
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;

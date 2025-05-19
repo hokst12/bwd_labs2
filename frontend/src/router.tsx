@@ -43,9 +43,7 @@ const router = createBrowserRouter([
   {
     path: '/events',
     element: (
-      <ProtectedRoute>
         <Events />
-      </ProtectedRoute>
     ),
     children: [
       {

@@ -4,6 +4,7 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 import { authService } from '../../api/auth';
+import { setError } from '../events/eventsSlice';
 
 interface User {
   id: number;
@@ -87,11 +88,19 @@ const authSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+    
     clearMessage(state) {
       state.message = null;
     },
     setMessage(state, action: PayloadAction<string>) {
       state.message = action.payload;
+    },
+    SetError(
+      state,
+      action: PayloadAction<{ message: string; statusCode?: number }>,
+    ) {
+      state.error = action.payload as AuthError
+      state.message = action.payload.message;
     },
   },
   extraReducers: (builder) => {
@@ -129,5 +138,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, clearMessage, setMessage } = authSlice.actions;
+export const { clearError, clearMessage, setMessage,SetError } = authSlice.actions;
 export default authSlice.reducer;

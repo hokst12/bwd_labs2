@@ -20,6 +20,7 @@ export const ErrorDisplay = ({
     if (!statusCode) return 'error-type';
     if (statusCode >= 500) return 'server-error-type';
     if (statusCode >= 400) return 'client-error-type';
+    if (statusCode >= 200) return 'success-type';
     return 'success-type';
   };
 

@@ -7,9 +7,11 @@ import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   register,
   clearError,
-  setMessage,
+  SetError as setAuthError,
 } from '../../features/auth/authSlice';
 import styles from './Register.module.css';
+
+
 
 export const Register = () => {
   const [formData, setFormData] = useState({
@@ -39,8 +41,10 @@ export const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      dispatch(clearError());
-      dispatch(setMessage('Пароли не совпадают'));
+      dispatch(setAuthError({
+        message: 'Пароли не совпадают',
+        statusCode: 400,
+      }));
       return;
     }
 

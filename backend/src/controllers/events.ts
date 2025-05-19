@@ -157,36 +157,38 @@ const eventsController = {
     }
   }) as unknown as RequestHandler,  
 
-  subscribeToEvent: (async (req: Request<{ id: string; }, unknown, { userId: number; }>, res: Response) => {
+  subscribeToEvent: (async (req: Request<{ id: string }, unknown, { userId: number }>, res: Response) => {
     try {
       const eventId = parseInt(req.params.id);
       const { userId } = req.body;
-
+  
       const event = await Event.findByPk(eventId);
       if (!event) {
         return res.status(404).json({ error: 'Мероприятие не найдено' });
       }
-
+  
       if (event.createdBy === userId) {
         return res.status(400).json({ error: 'Создатель не может подписаться на собственное мероприятие' });
       }
-
+  
       const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({ error: 'Пользователь не найден' });
       }
-
+  
       if (event.subscribers.includes(userId)) {
         return res.status(400).json({ error: 'Пользователь уже подписан на это мероприятие' });
       }
-
+  
+      const updatedSubscribers = [...event.subscribers, userId];
       await event.update({
-        subscribers: [...event.subscribers, userId]
+        subscribers: updatedSubscribers
       });
-
+  
       res.json({
         message: 'Пользователь успешно подписан на мероприятие',
-        subscribersCount: event.subscribers.length + 1
+        subscribersCount: updatedSubscribers.length,
+        subscribers: updatedSubscribers // Возвращаем обновлённый массив
       });
     } catch (error) {
       res.status(500).json({
@@ -195,28 +197,30 @@ const eventsController = {
       });
     }
   }) as unknown as RequestHandler,
-
-  unsubscribeFromEvent: (async (req: Request<{ id: string; }, unknown, { userId: number; }>, res: Response) => {
+  
+  unsubscribeFromEvent: (async (req: Request<{ id: string }, unknown, { userId: number }>, res: Response) => {
     try {
       const eventId = parseInt(req.params.id);
       const { userId } = req.body;
-
+  
       const event = await Event.findByPk(eventId);
       if (!event) {
         return res.status(404).json({ error: 'Мероприятие не найдено' });
       }
-
+  
       if (!event.subscribers.includes(userId)) {
         return res.status(400).json({ error: 'Пользователь не подписан на это мероприятие' });
       }
-
+  
+      const updatedSubscribers = event.subscribers.filter(id => id !== userId);
       await event.update({
-        subscribers: event.subscribers.filter(id => id !== userId)
+        subscribers: updatedSubscribers
       });
-
+  
       res.json({
         message: 'Пользователь успешно отписан от мероприятия',
-        subscribersCount: event.subscribers.length - 1
+        subscribersCount: updatedSubscribers.length,
+        subscribers: updatedSubscribers // Возвращаем обновлённый массив
       });
     } catch (error) {
       res.status(500).json({

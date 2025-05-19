@@ -1,41 +1,85 @@
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../../app/hooks';
-import { deleteEvent, restoreEvent } from '../../features/events/eventsSlice';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import {
+  deleteEvent,
+  restoreEvent,
+  subscribeToEvent,
+  unsubscribeFromEvent,
+  fetchEventParticipants,
+  clearParticipants,
+  type Event,
+} from '../../features/events/eventsSlice';
 import { Button } from '../Button';
-import type { Event } from '../../api/types';
 import styles from './EventCard.module.css';
+import { useState } from 'react';
+import { ParticipantsModal } from '../../pages/Events/components/ParticipantsModal';
+import { authService } from '../../api/auth';
 
 interface EventCardProps {
   event: Event;
   showCreator?: boolean;
   showActions?: boolean;
-  currentUserId?: number;
 }
 
 export const EventCard = ({
   event,
   showCreator = true,
   showActions = false,
-  currentUserId,
 }: EventCardProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const currentUser = authService.getCurrentUser();
+  const [showParticipantsModal, setShowParticipantsModal] = useState<number | null>(null);
+  const { participantsLoading } = useAppSelector((state) => state.events);
 
   const handleEdit = () => {
     navigate(`/events/edit/${event.id}`);
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Вы уверены, что хотите удалить мероприятие?')) {
-      dispatch(deleteEvent(event.id));
-    }
+  const handleDelete = (id: number) => {
+      dispatch(deleteEvent(id));
+      window.location.reload();
   };
 
   const handleRestore = () => {
     dispatch(restoreEvent(event.id));
   };
 
-  const isOwner = currentUserId === event.createdBy;
+  const handleSubscribe = async () => {
+    if (!currentUser) return;
+    try {
+      await dispatch(
+        subscribeToEvent({
+          eventId: event.id,
+          userId: currentUser.id,
+        }),
+      ).unwrap();
+    } catch (error) {
+      console.error('Ошибка подписки:', error);
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    if (!currentUser) return;
+    try {
+      await dispatch(
+        unsubscribeFromEvent({
+          eventId: event.id,
+          userId: currentUser.id,
+        }),
+      ).unwrap();
+    } catch (error) {
+      console.error('Ошибка отписки:', error);
+    }
+  };
+
+  const handleShowParticipants = () => {
+    setShowParticipantsModal(event.id);
+    dispatch(fetchEventParticipants(event.id));
+  };
+
+  const isOwner = currentUser?.id === event.createdBy;
+  const isSubscribed = currentUser && event.subscribers?.includes(currentUser.id);
 
   return (
     <div
@@ -62,44 +106,76 @@ export const EventCard = ({
         )}
 
         <div className={styles.eventFooter}>
-          {showCreator && (
-            <span className={styles.eventCreator}>
-              <span>👤</span> {event.creator?.name || 'Вы'}
-            </span>
-          )}
+          <div className={styles.eventInfo}>
+            {showCreator && (
+              <span className={styles.eventCreator}>
+                <span>👤</span> {event.creator?.name || 'Неизвестен'}
+              </span>
+            )}
+          </div>
 
-          {showActions && isOwner && (
+          {showActions && (
             <div className={styles.eventActions}>
-              {event.deletedAt ? (
-                <Button
-                  onClick={handleRestore}
-                  variant="success"
-                  className={styles.actionButton}
-                >
-                  Восстановить
-                </Button>
-              ) : (
-                <>
+              {isOwner ? (
+                event.deletedAt ? (
                   <Button
-                    onClick={handleEdit}
-                    variant="secondary"
+                    onClick={handleRestore}
+                    variant="success"
                     className={styles.actionButton}
                   >
-                    Редактировать
+                    Восстановить
                   </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={handleEdit}
+                      variant="secondary"
+                      className={styles.actionButton}
+                    >
+                      Редактировать
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(event.id)}
+                      variant="danger"
+                      className={styles.actionButton}
+                    >
+                      Удалить
+                    </Button>
+                  </>
+                )
+              ) : !event.deletedAt && currentUser && (
+                isSubscribed ? (
                   <Button
-                    onClick={handleDelete}
+                    onClick={handleUnsubscribe}
                     variant="danger"
                     className={styles.actionButton}
                   >
-                    Удалить
+                    Отписаться
                   </Button>
-                </>
+                ) : (
+                  <Button
+                    onClick={handleSubscribe}
+                    variant="primary"
+                    className={styles.actionButton}
+                  >
+                    Подписаться
+                  </Button>
+                )
               )}
             </div>
           )}
         </div>
       </div>
+
+      {showParticipantsModal === event.id && (
+        <ParticipantsModal
+          eventId={showParticipantsModal}
+          onClose={() => {
+            setShowParticipantsModal(null);
+            dispatch(clearParticipants());
+          }}
+        />
+      )}
     </div>
   );
 };

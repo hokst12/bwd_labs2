@@ -40,7 +40,6 @@ export const EventsList = () => {
   });
 
   const handleDelete = (id: number) => {
-    if (!window.confirm('Вы уверены, что хотите удалить мероприятие?')) return;
     dispatch(deleteEvent(id));
   };
 
@@ -57,13 +56,12 @@ export const EventsList = () => {
           userId: currentUser.id,
         }),
       ).unwrap();
-      // После успешной подписки обновляем данные
-      dispatch(fetchEvents(showDeleted));
+      // Не нужно заново загружать все события - состояние обновится через extraReducers
     } catch (error) {
       console.error('Ошибка подписки:', error);
     }
   };
-
+  
   const handleUnsubscribe = async (eventId: number) => {
     if (!currentUser) return;
     try {
@@ -73,8 +71,7 @@ export const EventsList = () => {
           userId: currentUser.id,
         }),
       ).unwrap();
-      // После успешной отписки обновляем данные
-      dispatch(fetchEvents(showDeleted));
+      // Не нужно заново загружать все события - состояние обновится через extraReducers
     } catch (error) {
       console.error('Ошибка отписки:', error);
     }
@@ -82,8 +79,8 @@ export const EventsList = () => {
 
   // Проверяем, подписан ли текущий пользователь на мероприятие
   const isUserSubscribed = (event: Event) => {
-    if (!currentUser || !event.participants) return false;
-    return event.participants.some((p) => p.id === currentUser.id);
+    if (!currentUser || !event.subscribers) return false;
+    return event.subscribers.includes(currentUser.id);
   };
 
   if (loading) {
@@ -201,12 +198,7 @@ export const EventsList = () => {
                       {currentUser?.id === event.createdBy ? (
                         <div className={styles.eventActions}>
                           {event.deletedAt ? (
-                            <Button
-                              onClick={() => handleRestore(event.id)}
-                              variant="success"
-                            >
-                              Восстановить
-                            </Button>
+                            <></>
                           ) : (
                             <>
                               <Button
@@ -231,7 +223,7 @@ export const EventsList = () => {
                             {isUserSubscribed(event) ? (
                               <Button
                                 onClick={() => handleUnsubscribe(event.id)}
-                                variant="secondary"
+                                variant="danger"
                               >
                                 Отписаться
                               </Button>
