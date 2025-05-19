@@ -30,6 +30,21 @@ class User
   declare createdAt: Date;
   declare deletedAt: Date | null;
 
+  static associate(models: { 
+    Event: typeof import('./Event').default;
+    EventParticipant: typeof import('./EventParticipant').default;
+  }) {
+    User.hasMany(models.Event, {
+      foreignKey: 'createdBy',
+      as: 'createdEvents',
+    });
+    
+    User.hasMany(models.EventParticipant, {
+      foreignKey: 'userId',
+      as: 'participations',
+    });
+  }
+
   public comparePassword(candidatePassword: string): boolean {
     const password = this.getDataValue('password');
     if (!candidatePassword || !password) return false;

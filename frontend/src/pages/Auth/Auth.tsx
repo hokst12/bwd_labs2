@@ -2,8 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Button } from '../../components/Button';
-import { authService } from '../../api/auth';
+
 import { ErrorDisplay } from '../../components/ErrorDisplay/ErrorDisplay';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import {
+  login,
+  clearError,
+  clearMessage,
+  setMessage,
+} from '../../features/auth/authSlice';
 import styles from './Auth.module.css';
 
 export const Auth = () => {
@@ -11,48 +18,40 @@ export const Auth = () => {
     email: '',
     password: '',
   });
-  const [error, setError] = useState<{
-    message: string;
-    statusCode?: number;
-  } | null>(null);
-  const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const { user, loading, error, message } = useAppSelector(
+    (state) => state.auth,
+  );
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.message) {
-      setMessage(location.state.message);
-    }
-  }, [location]);
-
-  useEffect(() => {
-    if (authService.isAuthenticated()) {
+    if (user) {
       navigate('/events');
     }
-  }, [navigate]);
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (location.state?.message) {
+      dispatch(setMessage(location.state.message));
+    }
+    return () => {
+      dispatch(clearMessage());
+    };
+  }, [location, dispatch]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setError(null);
+
+    if (error) dispatch(clearError());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    try {
-      setIsLoading(true);
-      await authService.login(formData.email, formData.password);
-      navigate('/events');
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || 'Ошибка авторизации';
-      const statusCode = error.response?.status || 500;
-      setError({ message: errorMessage, statusCode });
-    } finally {
-      setIsLoading(false);
-    }
+    dispatch(login({ email: formData.email, password: formData.password }));
   };
 
   return (
@@ -67,7 +66,7 @@ export const Auth = () => {
             <ErrorDisplay
               error={message}
               statusCode={200}
-              onClose={() => setMessage('')}
+              onClose={() => dispatch(clearMessage())}
             />
           )}
 
@@ -75,7 +74,7 @@ export const Auth = () => {
             <ErrorDisplay
               error={error.message}
               statusCode={error.statusCode}
-              onClose={() => setError(null)}
+              onClose={() => dispatch(clearError())}
               autoCloseDelay={5000}
             />
           )}
@@ -108,9 +107,9 @@ export const Auth = () => {
             type="submit"
             variant="primary"
             className={styles.submitButton}
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? 'Вход...' : 'Войти'}
+            {loading ? 'Вход...' : 'Войти'}
           </Button>
 
           <div className={styles.registerLink}>

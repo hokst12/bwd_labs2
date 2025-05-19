@@ -1,100 +1,90 @@
-import { useState, useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { eventsService } from '../../../api/events';
-import { authService } from '../../../api/auth';
 import { Button } from '../../../components/Button';
 import { ErrorDisplay } from '../../../components/ErrorDisplay/ErrorDisplay';
 import styles from '../Events.module.css';
-import React from 'react';
-
-interface Event {
-  id: number;
-  title: string;
-  description: string | null;
-  date: string;
-  createdBy: number;
-  deletedAt: string | null;
-  creator?: {
-    id: number;
-    name: string;
-    email: string;
-  };
-}
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import {
+  fetchEvents,
+  deleteEvent,
+  restoreEvent,
+  toggleShowDeleted,
+  clearError,
+  subscribeToEvent,
+  unsubscribeFromEvent,
+  fetchEventParticipants,
+  clearParticipants,
+  type Event,
+} from '../../../features/events/eventsSlice';
+import { authService } from '../../../api/auth';
+import { ParticipantsModal } from './ParticipantsModal';
 
 export const EventsList = () => {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [showDeleted, setShowDeleted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<{
-    message: string;
-    statusCode?: number;
-  } | null>(null);
+  const dispatch = useAppDispatch();
+  const { events, loading, error, errorStatusCode, showDeleted, participants } =
+    useAppSelector((state) => state.events);
   const currentUser = authService.getCurrentUser();
+  const [showParticipantsModal, setShowParticipantsModal] = useState<
+    number | null
+  >(null);
 
+  // Получаем актуальные данные о мероприятиях
   useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        setLoading(true);
-        const data = await eventsService.getEvents(showDeleted);
+    dispatch(fetchEvents(showDeleted));
+  }, [dispatch, showDeleted]);
 
-        // Сортируем мероприятия: сначала активные, потом удалённые
-        const sortedEvents = [...data].sort((a, b) => {
-          if (a.deletedAt && !b.deletedAt) return 1; // b (активное) должно быть первым
-          if (!a.deletedAt && b.deletedAt) return -1; // a (активное) должно быть первым
-          return new Date(a.date).getTime() - new Date(b.date).getTime(); // Сортировка по дате
-        });
+  const sortedEvents = [...events].sort((a: Event, b: Event) => {
+    if (a.deletedAt && !b.deletedAt) return 1;
+    if (!a.deletedAt && b.deletedAt) return -1;
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
 
-        setEvents(sortedEvents);
-      } catch (err: any) {
-        const errorMessage =
-          err.response?.data?.message || 'Не удалось загрузить мероприятия';
-        const statusCode = err.response?.status || 500;
-        setError({ message: errorMessage, statusCode });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleDelete = (id: number) => {
+    dispatch(deleteEvent(id));
+  };
 
-    loadEvents();
-  }, [showDeleted]);
+  const handleRestore = (id: number) => {
+    dispatch(restoreEvent(id));
+  };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Вы уверены, что хотите удалить мероприятие?')) return;
-
+  const handleSubscribe = async (eventId: number) => {
+    if (!currentUser) return;
     try {
-      await eventsService.deleteEvent(id);
-      setEvents(
-        events.map((event) =>
-          event.id === id
-            ? { ...event, deletedAt: new Date().toISOString() }
-            : event,
-        ),
-      );
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || 'Не удалось удалить мероприятие';
-      const statusCode = err.response?.status || 500;
-      setError({ message: errorMessage, statusCode });
+      await dispatch(
+        subscribeToEvent({
+          eventId,
+          userId: currentUser.id,
+        }),
+      ).unwrap();
+      // Не нужно заново загружать все события - состояние обновится через extraReducers
+    } catch (error) {
+      console.error('Ошибка подписки:', error);
+    }
+  };
+  
+  const handleUnsubscribe = async (eventId: number) => {
+    if (!currentUser) return;
+    try {
+      await dispatch(
+        unsubscribeFromEvent({
+          eventId,
+          userId: currentUser.id,
+        }),
+      ).unwrap();
+      // Не нужно заново загружать все события - состояние обновится через extraReducers
+    } catch (error) {
+      console.error('Ошибка отписки:', error);
     }
   };
 
-  const handleRestore = async (id: number) => {
-    try {
-      await eventsService.restoreEvent(id);
-      setEvents(
-        events.map((event) =>
-          event.id === id ? { ...event, deletedAt: null } : event,
-        ),
-      );
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || 'Не удалось восстановить мероприятие';
-      const statusCode = err.response?.status || 500;
-      setError({ message: errorMessage, statusCode });
-    }
+  // Проверяем, подписан ли текущий пользователь на мероприятие
+  const isUserSubscribed = (event: Event) => {
+    if (!currentUser || !event.subscribers) return false;
+    return event.subscribers.includes(currentUser.id);
   };
 
-  if (loading)
+  if (loading) {
     return (
       <div className={styles.mainContent}>
         <div
@@ -105,14 +95,16 @@ export const EventsList = () => {
         </div>
       </div>
     );
+  }
 
   return (
     <div className={styles.mainContent}>
       {error && (
         <ErrorDisplay
-          error={error.message}
-          statusCode={error.statusCode}
-          onClose={() => setError(null)}
+          error={error}
+          statusCode={errorStatusCode}
+          onClose={() => dispatch(clearError())}
+          autoCloseDelay={5000}
         />
       )}
 
@@ -124,7 +116,7 @@ export const EventsList = () => {
               <input
                 type="checkbox"
                 checked={showDeleted}
-                onChange={() => setShowDeleted(!showDeleted)}
+                onChange={() => dispatch(toggleShowDeleted())}
               />
               <span className={styles.slider}></span>
             </label>
@@ -134,14 +126,14 @@ export const EventsList = () => {
           </div>
 
           {currentUser && (
-    <Link to="/events/new" className={styles.createButton}>
-      <span>+</span> Создать мероприятие
-    </Link>
-  )}
+            <Link to="/events/new" className={styles.createButton}>
+              <span>+</span> Создать мероприятие
+            </Link>
+          )}
         </div>
       </div>
 
-      {events.length === 0 ? (
+      {sortedEvents.length === 0 ? (
         <div
           className={styles.card}
           style={{ textAlign: 'center', padding: '3rem' }}
@@ -152,16 +144,18 @@ export const EventsList = () => {
         </div>
       ) : (
         <div className={styles.eventsGrid}>
-          {events.map((event, index) => {
-            // Добавляем разделитель перед первым удалённым мероприятием
+          {sortedEvents.map((event: Event, index) => {
             const showDivider =
-              event.deletedAt && (index === 0 || !events[index - 1].deletedAt);
+              event.deletedAt &&
+              (index === 0 || !sortedEvents[index - 1].deletedAt);
 
             return (
               <React.Fragment key={event.id}>
                 {showDivider && (
-                  <div className={styles.eventsDivider}>
-                    Удалённые мероприятия
+                  <div className={styles.fullWidthDivider}>
+                    <div className={styles.dividerContent}>
+                      Удалённые мероприятия
+                    </div>
                   </div>
                 )}
                 <div
@@ -190,19 +184,22 @@ export const EventsList = () => {
                       </p>
                     )}
                     <div className={styles.eventFooter}>
-                      <span className={styles.eventCreator}>
-                        <span>👤</span> {event.creator?.name || 'Неизвестен'}
-                      </span>
+                      <div className={styles.eventInfo}>
+                        <span className={styles.eventCreator}>
+                          <span>👤</span> {event.creator?.name || 'Неизвестен'}
+                        </span>
+                        <button
+                          className={styles.participantsCount}
+                          onClick={() => setShowParticipantsModal(event.id)}
+                        >
+                          <span>👥</span> {event.participantsCount} участники
+                        </button>
+                      </div>
 
-                      {currentUser?.id === event.createdBy && (
+                      {currentUser?.id === event.createdBy ? (
                         <div className={styles.eventActions}>
                           {event.deletedAt ? (
-                            <Button
-                              onClick={() => handleRestore(event.id)}
-                              variant="success"
-                            >
-                              Восстановить
-                            </Button>
+                            <></>
                           ) : (
                             <>
                               <Button
@@ -220,6 +217,29 @@ export const EventsList = () => {
                             </>
                           )}
                         </div>
+
+                      ) : (
+                        !event.deletedAt &&
+                        currentUser && (
+                          <div className={styles.eventActions}>
+                            {isUserSubscribed(event) ? (
+                              <Button
+                                onClick={() => handleUnsubscribe(event.id)}
+                                variant="danger"
+                              >
+                                Отписаться
+                              </Button>
+                            ) : (
+                              <Button
+                                onClick={() => handleSubscribe(event.id)}
+                                variant="primary"
+                              >
+                                Подписаться
+                              </Button>
+                            )}
+                          </div>
+                        )
+
                       )}
                     </div>
                   </div>
@@ -228,6 +248,16 @@ export const EventsList = () => {
             );
           })}
         </div>
+      )}
+
+      {showParticipantsModal && (
+        <ParticipantsModal
+          eventId={showParticipantsModal}
+          onClose={() => {
+            setShowParticipantsModal(null);
+            dispatch(clearParticipants());
+          }}
+        />
       )}
     </div>
   );

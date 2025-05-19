@@ -15,25 +15,66 @@ router.use(passport.authenticate('jwt', { session: false }));
 
 /**
  * @swagger
- * /users:
+ * /users/info/{id}:
  *   get:
- *     summary: Получить всех активных пользователей
+ *     summary: Получить информацию о пользователе по ID
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Список пользователей
+ *         description: Информация о пользователе
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *       404:
+ *         description: Пользователь не найден
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/info/:id', usersController.getUserInfoById);
+
+/**
+ * @swagger
+ * /users/{id}/created-events:
+ *   get:
+ *     summary: Получить все мероприятия пользователя по ID
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Список мероприятий пользователя
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/User'
+ *                 $ref: '#/components/schemas/Event'
+ *       404:
+ *         description: Пользователь не найден
  *       500:
  *         description: Ошибка сервера
  */
-router.get('/', usersController.getUsers);
+router.get('/:id/created-events', usersController.getUserCreatedEventsById);
 
 /**
  * @swagger

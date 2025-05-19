@@ -7,6 +7,9 @@ import { NotFound } from './pages/NotFound';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { EventsList } from './pages/Events/components/EventsList';
 import { EventForm } from './pages/Events/components/EventForm';
+import { GuestRoute } from './components/GuestRoute/GuestRoute';
+import { authService } from './api/auth';
+import { Profile } from './pages/Profile/Profile';
 
 const router = createBrowserRouter([
   {
@@ -15,15 +18,33 @@ const router = createBrowserRouter([
   },
   {
     path: '/auth',
-    element: <Auth />,
+    element: (
+      <GuestRoute>
+        <Auth />
+      </GuestRoute>
+    ),
   },
   {
     path: '/register',
-    element: <Register />,
+    element: (
+      <GuestRoute>
+        <Register />
+      </GuestRoute>
+    ),
+  },
+  {
+    path: '/profile',
+    element: (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/events',
-    element: <Events />, // Основной layout
+    element: (
+        <Events />
+    ),
     children: [
       {
         path: '', // /events
@@ -31,19 +52,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'new', // /events/new
-        element: (
-          <ProtectedRoute>
-            <EventForm />
-          </ProtectedRoute>
-        ),
+        element: <EventForm />,
       },
       {
         path: 'edit/:id', // /events/edit/:id
-        element: (
-          <ProtectedRoute>
-            <EventForm />
-          </ProtectedRoute>
-        ),
+        element: <EventForm />,
       },
     ],
   },

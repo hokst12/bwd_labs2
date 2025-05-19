@@ -8,11 +8,12 @@ interface EventAttributes {
   date: Date;
   createdBy: number;
   deletedAt: Date | null;
+  subscribers: number[]; // Новое поле - массив ID подписавшихся пользователей
 }
 
 type EventCreationAttributes = Optional<
   EventAttributes,
-  'id' | 'description' | 'deletedAt'
+  'id' | 'description' | 'deletedAt' | 'subscribers'
 >;
 
 class Event
@@ -25,8 +26,11 @@ class Event
   declare date: Date;
   declare createdBy: number;
   declare deletedAt: Date | null;
+  declare subscribers: number[];
 
-  static associate(models: { User: typeof import('./User').default }) {
+  static associate(models: { 
+    User: typeof import('./User').default;
+  }) {
     Event.belongsTo(models.User, {
       foreignKey: 'createdBy',
       as: 'creator',
@@ -66,6 +70,11 @@ Event.init(
     deletedAt: {
       type: DataTypes.DATE,
       defaultValue: null,
+    },
+    subscribers: {
+      type: DataTypes.ARRAY(DataTypes.INTEGER),
+      defaultValue: [],
+      allowNull: false,
     },
   },
   {

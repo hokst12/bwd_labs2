@@ -20,7 +20,9 @@ export const ErrorDisplay = ({
     if (!statusCode) return 'error-type';
     if (statusCode >= 500) return 'server-error-type';
     if (statusCode >= 400) return 'client-error-type';
-    return 'error-type';
+
+    if (statusCode >= 200) return 'success-type';
+    return 'success-type';
   };
 
   useEffect(() => {
@@ -49,11 +51,13 @@ export const ErrorDisplay = ({
           isClosing ? styles['closing'] : ''
         }`}
         style={{
-          top: '80px', // Фиксированная позиция ниже шапки
+
+          top: '80px',
           right: '20px',
         }}
       >
-        {statusCode && (
+        {statusCode && statusCode !== 200 && (
+
           <div className={styles['error-code']}>Ошибка {statusCode}</div>
         )}
         <div className={styles['error-message']}>{error}</div>

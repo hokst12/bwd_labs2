@@ -1,10 +1,18 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Button } from '../../components/Button';
-import { authService } from '../../api/auth';
 import { ErrorDisplay } from '../../components/ErrorDisplay/ErrorDisplay';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import {
+  register,
+  clearError,
+  SetError as setAuthError,
+} from '../../features/auth/authSlice';
 import styles from './Register.module.css';
+
+
 
 export const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,47 +21,50 @@ export const Register = () => {
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState<{
-    message: string;
-    statusCode?: number;
-  } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setError(null);
+    dispatch(clearError());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      setError({ message: 'Пароли не совпадают', statusCode: 400 });
+
+      dispatch(setAuthError({
+        message: 'Пароли не совпадают',
+        statusCode: 400,
+      }));
       return;
     }
 
-    try {
-      setIsLoading(true);
-      await authService.register(
-        formData.email,
-        formData.name,
-        formData.password,
-      );
+    const resultAction = await dispatch(
+      register({
+        email: formData.email,
+        name: formData.name,
+        password: formData.password,
+      }),
+    );
 
+    if (register.fulfilled.match(resultAction)) {
       navigate('/auth', {
         state: {
-          registrationSuccess: true,
           message: 'Регистрация успешна! Теперь войдите в систему.',
         },
       });
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Ошибка регистрации';
-      const statusCode = err.response?.status || 500;
-      setError({ message: errorMessage, statusCode });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -69,7 +80,8 @@ export const Register = () => {
             <ErrorDisplay
               error={error.message}
               statusCode={error.statusCode}
-              onClose={() => setError(null)}
+
+              onClose={() => dispatch(clearError())}
               autoCloseDelay={5000}
             />
           )}
@@ -82,6 +94,8 @@ export const Register = () => {
               value={formData.name}
               onChange={handleChange}
               required
+
+              placeholder="Введите ваше имя"
             />
           </div>
 
@@ -93,6 +107,7 @@ export const Register = () => {
               value={formData.email}
               onChange={handleChange}
               required
+              placeholder="Введите ваш email"
             />
           </div>
 
@@ -105,6 +120,7 @@ export const Register = () => {
               onChange={handleChange}
               required
               minLength={6}
+              placeholder="Введите пароль (мин. 6 символов)"
             />
           </div>
 
@@ -116,6 +132,7 @@ export const Register = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
+              placeholder="Подтвердите пароль"
             />
           </div>
 
@@ -123,9 +140,9 @@ export const Register = () => {
             type="submit"
             variant="primary"
             className={styles.submitButton}
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </Button>
 
           <div className={styles.loginLink}>

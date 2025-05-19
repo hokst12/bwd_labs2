@@ -16,6 +16,28 @@ router.use(passport.authenticate('jwt', { session: false }));
 /**
  * @swagger
  * /events:
+ *   get:
+ *     summary: Получить список активных мероприятий
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список активных мероприятий
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Event'
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/', eventsController.getEvents);
+
+/**
+ * @swagger
+ * /events:
  *   post:
  *     summary: Создать новое мероприятие
  *     tags: [Events]
@@ -221,5 +243,138 @@ router.delete('/:id', eventsController.deleteEvent);
  *         description: Ошибка сервера
  */
 router.post('/:id/restore', eventsController.restoreEvent);
+
+/**
+ * @swagger
+ * /events/{id}/subscribe:
+ *   post:
+ *     summary: Подписаться на мероприятие
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Успешная подписка
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 subscribersCount:
+ *                   type: integer
+ *       400:
+ *         description: Неверные входные данные или пользователь уже подписан
+ *       404:
+ *         description: Мероприятие или пользователь не найдены
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.post('/:id/subscribe', eventsController.subscribeToEvent);
+
+/**
+ * @swagger
+ * /events/{id}/unsubscribe:
+ *   post:
+ *     summary: Отписаться от мероприятия
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Успешная отписка
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 subscribersCount:
+ *                   type: integer
+ *       400:
+ *         description: Пользователь не подписан на мероприятие
+ *       404:
+ *         description: Мероприятие не найдено
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.post('/:id/unsubscribe', eventsController.unsubscribeFromEvent);
+
+/**
+ * @swagger
+ * /events/{id}/participants:
+ *   get:
+ *     summary: Получить всех подписавшихся на мероприятие
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Список подписавшихся пользователей
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 eventId:
+ *                   type: integer
+ *                 eventTitle:
+ *                   type: string
+ *                 participants:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 participantsCount:
+ *                   type: integer
+ *       404:
+ *         description: Мероприятие не найдено
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/:id/participants', eventsController.getEventParticipants);
 
 export default router;
