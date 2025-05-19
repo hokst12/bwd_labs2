@@ -16,9 +16,13 @@ export const setupMorgan = () => {
 };
 
 export const setupCors = () => {
+  const allowedMethods = process.env.ALLOWED_METHODS?.split(',') || ['GET', 'POST', 'OPTIONS'];
+  const allowedOrigins = process.env.TRUSTED_DOMAINS?.split(',') || [];
+  
   return cors({
-    origin: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
+    origin: allowedOrigins,
+    methods: allowedMethods,
+    credentials: true, // Добавьте эту строку
     optionsSuccessStatus: 200,
   });
 };
