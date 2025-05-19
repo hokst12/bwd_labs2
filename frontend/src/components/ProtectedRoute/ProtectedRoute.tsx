@@ -1,3 +1,4 @@
+
 import { Navigate, useLocation } from 'react-router-dom';
 import { authService } from '../../api/auth';
 import { useEffect, type JSX } from 'react';
@@ -15,6 +16,7 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   if (!isAuthenticated) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
+
 
   return children;
 };

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+
 interface User {
   id: number; // Добавляем id в интерфейс User
   name: string;
@@ -52,7 +53,9 @@ export const authService = {
     localStorage.removeItem('user');
   },
 
+
   getCurrentUser(): User | null {
+
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
   },
@@ -62,6 +65,7 @@ export const authService = {
   },
 
   isAuthenticated(): boolean {
+
     return !!this.getAuthToken();
   },
 };

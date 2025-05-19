@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import { Button } from '../../../components/Button';
 import { ErrorDisplay } from '../../../components/ErrorDisplay/ErrorDisplay';
 import styles from '../Events.module.css';
@@ -14,6 +15,7 @@ import {
 export const EventForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const dispatch = useAppDispatch();
   const { error, loading, currentEvent, errorStatusCode } = useAppSelector(
     (state) => state.events,

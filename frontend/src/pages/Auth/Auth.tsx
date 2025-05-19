@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Button } from '../../components/Button';
+
 import { ErrorDisplay } from '../../components/ErrorDisplay/ErrorDisplay';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
@@ -40,9 +41,11 @@ export const Auth = () => {
     };
   }, [location, dispatch]);
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
     if (error) dispatch(clearError());
   };
 

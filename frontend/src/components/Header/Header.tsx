@@ -18,6 +18,7 @@ export const Header = () => {
         EventApp
       </Link>
 
+
       <nav className={styles.nav}>
         {isAuth ? (
           <>
@@ -27,6 +28,7 @@ export const Header = () => {
             <span className={styles.username}>
               <Link to="/Profile">{user?.name}</Link>
             </span>
+
             <button onClick={handleLogout} className={styles.link}>
               Выйти
             </button>

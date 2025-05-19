@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
@@ -21,6 +22,7 @@ export const Register = () => {
     confirmPassword: '',
   });
 
+
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -41,6 +43,7 @@ export const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
+
       dispatch(setAuthError({
         message: 'Пароли не совпадают',
         statusCode: 400,
@@ -77,6 +80,7 @@ export const Register = () => {
             <ErrorDisplay
               error={error.message}
               statusCode={error.statusCode}
+
               onClose={() => dispatch(clearError())}
               autoCloseDelay={5000}
             />
@@ -90,6 +94,7 @@ export const Register = () => {
               value={formData.name}
               onChange={handleChange}
               required
+
               placeholder="Введите ваше имя"
             />
           </div>
